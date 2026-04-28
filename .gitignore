@@ -1,0 +1,5 @@
+__pycache__/
+.idea/
+venv
+analysis_of_questionnaires/data
+analysis_of_questionnaires/results
