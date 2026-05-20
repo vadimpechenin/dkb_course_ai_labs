@@ -3,7 +3,7 @@ import numpy as np
 import re
 import matplotlib.pyplot as plt
 
-FILE_PATH = "data/2026-04-27 ТЕСТ Подготовка специалистов по анализу данных и ИИ в промыш.xlsx"
+FILE_PATH = "data/2026-05-20 Подготовка специалистов по анализу данных в промышленности.xlsx"
 SAFE_PATH = "results"
 # ==============================
 # ФУНКЦИИ
@@ -120,7 +120,7 @@ print(f"Индекс практико-ориентированности: {pract
 col_coop = [c for c in df.columns if "участвовать" in c.lower()][0]
 coop_dist = percent_distribution(df[col_coop])
 
-coop_rate = coop_dist.get("да", 0) + coop_dist.get("возможно", 0)
+coop_rate = coop_dist.get("да ", 0) + coop_dist.get("возможно ", 0)
 
 print("\nГотовность к сотрудничеству (%):")
 print(coop_dist)
