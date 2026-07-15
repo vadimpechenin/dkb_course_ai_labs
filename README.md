@@ -7,3 +7,6 @@ python v 3.11
 ## 1 analysis_of_questionnaires
 Коды анализа анкет по курсу
 
+## 2 labor_intensity_forecasting
+Исходные коды лабораторной 5 ПРОГНОЗ ТРУДОЕМКОСТИ ТЕХНОЛОГИЧЕСКИХ ОПЕРАЦИЙ
+

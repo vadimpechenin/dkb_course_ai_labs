@@ -1,0 +1,31 @@
+Здесь храняться файлы весов моделей в виде структуры
+
+weights/
+│
+├── random_forest/
+│   ├── current/
+│   │   ├── model.joblib
+│   │   ├── scaler.joblib
+│   │   ├── encoder.joblib
+│   │   └── features.json
+│   └── archive/
+│       ├── v1/
+│       ├── v2/
+│       └── v3/
+│
+├── mlp/
+│   ├── current/
+│   │   ├── model.pt
+│   │   ├── scaler.joblib
+│   │   ├── encoder.joblib
+│   │   └── features.json
+│   └── archive/
+│
+├── xgboost/
+│   └── current/
+│
+├── catboost/
+│   └── current/
+│
+└── linear_regression/
+    └── current/
