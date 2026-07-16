@@ -1,7 +1,7 @@
 # точка входа в сервер
 import uvicorn
 from fastapi import FastAPI
-from app.api import initial
+from app.api import *
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.settings import CORS_ORIGINS
@@ -34,6 +34,12 @@ app.add_middleware(
 
 # Все пути
 app.include_router(initial.router)
+app.include_router(forecast_router)
+app.include_router(retrain_router)
+app.include_router(models_router)
+app.include_router(dataset_router)
+app.include_router(predictions_router)
+app.include_router(settings_router)
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
