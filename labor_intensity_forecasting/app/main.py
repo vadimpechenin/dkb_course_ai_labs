@@ -40,6 +40,7 @@ app.include_router(models_router)
 app.include_router(dataset_router)
 app.include_router(predictions_router)
 app.include_router(settings_router)
+app.include_router(dashboard_router)
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)

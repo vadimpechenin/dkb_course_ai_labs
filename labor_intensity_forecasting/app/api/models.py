@@ -44,3 +44,21 @@ async def training_runs():
     """
 
     pass
+
+@router.get("/experiments/{training_run_id}")
+async def experiment(training_run_id: str):
+
+    """
+    Полная информация о конкретном эксперименте.
+
+    Возвращает:
+        - модель
+        - training_config
+        - RMSE
+        - MAE
+        - R2
+        - время обучения
+        - дату обучения
+    """
+
+    pass

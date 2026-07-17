@@ -1,3 +1,4 @@
+from .dashboard import router as dashboard_router
 from .initial import router as initial_router
 from .forecast import router as forecast_router
 from .retrain import router as retrain_router
