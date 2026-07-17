@@ -1,80 +1,64 @@
-import {useEffect,useState} from "react";
+import { useEffect, useState } from "react";
 
 import Grid from "@mui/material/Grid";
 
-import StatisticCard from "../components/StatisticCard";
+import AppLayout from "../components/layout/AppLayout";
 
-import {getDashboard} from "../api/dashboardApi";
+import DashboardCards from "../components/dashboard/DashboardCards";
+import RMSEChart from "../components/dashboard/RMSEChart";
+import TrainingInfo from "../components/dashboard/TrainingInfo";
+import ModelInfoCard from "../components/dashboard/ModelInfoCard";
+import DatasetInfoCard from "../components/dashboard/DatasetInfoCard";
 
-export default function DashboardPage(){
+import { getDashboard } from "../api/dashboardApi";
 
-    const[data,setData]=useState<any>();
+import type { Dashboard } from "../types/Dashboard";
 
-    useEffect(()=>{
+export default function DashboardPage() {
 
-        getDashboard()
+    const [dashboard, setDashboard] = useState<Dashboard>();
 
-            .then(setData);
+    useEffect(() => {
 
-    },[]);
+        getDashboard().then(setDashboard);
 
-    if(!data)
+    }, []);
 
-        return<>Loading...</>;
+    if (!dashboard)
 
-    return(
+        return <>Loading...</>;
 
-        <Grid container spacing={2}>
+    return (
 
-            <Grid item xs={3}>
+        <AppLayout>
 
-                <StatisticCard
+            <DashboardCards dashboard={dashboard} />
 
-                    title="Операций"
+            <Grid
+                container
+                spacing={2}
+                sx={{ mt: 2 }}
+            >
 
-                    value={data.operationsCount}
+                <Grid item xs={6}>
 
-                />
+                    <ModelInfoCard dashboard={dashboard} />
 
-            </Grid>
+                </Grid>
 
-            <Grid item xs={3}>
+                <Grid item xs={6}>
 
-                <StatisticCard
+                    <DatasetInfoCard dashboard={dashboard} />
 
-                    title="Признаков"
-
-                    value={data.featuresCount}
-
-                />
-
-            </Grid>
-
-            <Grid item xs={3}>
-
-                <StatisticCard
-
-                    title="Активная модель"
-
-                    value={data.activeModel}
-
-                />
+                </Grid>
 
             </Grid>
 
-            <Grid item xs={3}>
+            <RMSEChart dashboard={dashboard} />
 
-                <StatisticCard
+            <TrainingInfo dashboard={dashboard} />
 
-                    title="RMSE"
-
-                    value={data.rmse}
-
-                />
-
-            </Grid>
-
-        </Grid>
+        </AppLayout>
 
     );
 

@@ -1,5 +1,9 @@
 from fastapi import APIRouter
 
+from app.db.core.session import SQLDataBase
+
+from app.services.dashboard import DashboardService
+
 router = APIRouter(
     prefix="",
     tags=["Dashboard"]
@@ -20,4 +24,16 @@ async def dashboard():
     - дату последнего обучения;
     """
 
-    pass
+    database = SQLDataBase()
+
+    database.create_session()
+
+    try:
+
+        service = DashboardService(database.session)
+
+        return service.get_dashboard()
+
+    finally:
+
+        database.session.close()

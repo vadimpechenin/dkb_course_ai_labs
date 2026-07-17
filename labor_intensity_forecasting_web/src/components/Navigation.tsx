@@ -1,4 +1,5 @@
 import {Drawer,List,ListItemButton,ListItemText} from "@mui/material";
+import { Link } from "react-router-dom";
 
 export default function Navigation(){
 
@@ -8,7 +9,7 @@ export default function Navigation(){
 
             <List>
 
-                <ListItemButton>
+                <ListItemButton  component={Link} to="/dashboard">
 
                     <ListItemText primary="Главная"/>
 

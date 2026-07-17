@@ -1,4 +1,4 @@
-from core.base import *
+from app.db.core.base import *
 
 class FeatureSetting(Base):
     __tablename__ = "feature_settings"

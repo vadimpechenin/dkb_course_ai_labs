@@ -1,4 +1,4 @@
-from core.base import *
+from app.db.core.base import *
 
 class Prediction(Base):
     __tablename__ = "predictions"

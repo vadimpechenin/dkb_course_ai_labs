@@ -1,4 +1,4 @@
-from core.base import *
+from app.db.core.base import *
 
 class ModelFile(Base):
     __tablename__ = "model_files"

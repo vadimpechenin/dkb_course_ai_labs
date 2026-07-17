@@ -1,0 +1,51 @@
+import {BrowserRouter,Routes,Route, Navigate } from "react-router-dom";
+
+
+import DashboardPage from "../pages/DashboardPage";
+/*
+import TrainingPage from "../pages/TrainingPage";
+
+import ForecastPage from "../pages/ForecastPage";
+
+import DatasetPage from "../pages/DatasetPage";
+
+import ExperimentsPage from "../pages/ExperimentsPage";
+
+import PredictionHistoryPage from "../pages/PredictionHistoryPage";
+
+import SettingsPage from "../pages/SettingsPage";
+
+import AboutPage from "../pages/AboutPage";
+
+     <Route path="/training" element={<TrainingPage/>}/>
+
+                <Route path="/forecast" element={<ForecastPage/>}/>
+
+                <Route path="/dataset" element={<DatasetPage/>}/>
+
+                <Route path="/experiments" element={<ExperimentsPage/>}/>
+
+                <Route path="/history" element={<PredictionHistoryPage/>}/>
+
+                <Route path="/settings" element={<SettingsPage/>}/>
+
+                <Route path="/about" element={<AboutPage/>}/>*/
+
+export default function AppRouter(){
+
+    return(
+
+        <BrowserRouter>
+
+            <Routes>
+                <Route path="/" element={<Navigate to="/dashboard" replace />} />
+
+                <Route path="/dashboard" element={<DashboardPage/>}/>
+
+            </Routes>
+
+        </BrowserRouter>
+
+    );
+
+}

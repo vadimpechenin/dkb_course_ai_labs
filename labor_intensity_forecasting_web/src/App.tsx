@@ -1,28 +1,7 @@
-import Navigation from "./components/Navigation";
-
-import DashboardPage from "./pages/DashboardPage";
+import AppRouter from "./routes/AppRouter";
 
 export default function App(){
 
-  return(
-
-      <>
-
-        <Navigation/>
-
-        <div
-            style={{
-              marginLeft:260,
-              padding:20
-            }}
-        >
-
-          <DashboardPage/>
-
-        </div>
-
-      </>
-
-  );
+    return <AppRouter/>;
 
 }

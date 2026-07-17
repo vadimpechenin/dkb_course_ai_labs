@@ -1,4 +1,4 @@
-from core.base import *
+from app.db.core.base import *
 
 class MLModel(Base):
     __tablename__ = "ml_models"

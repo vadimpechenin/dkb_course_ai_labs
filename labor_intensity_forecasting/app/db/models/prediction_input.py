@@ -1,4 +1,4 @@
-from core.base import *
+from app.db.core.base import *
 
 class PredictionInput(Base):
     __tablename__ = "prediction_inputs"
