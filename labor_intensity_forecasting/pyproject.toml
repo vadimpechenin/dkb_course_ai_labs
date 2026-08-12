@@ -1,0 +1,30 @@
+[project]
+name = "laborintensityforecastingserver"
+version = "0.1.0"
+description = "Main server of Labor Intensity Forecasting project"
+authors = [
+    {name = "Pechenin Vadim",email = "vadim.pechenin2015@gmail.com"}
+]
+license = "MIT"
+requires-python = ">=3.11,<3.13"
+dependencies = [
+    "fastapi (==0.115.14)",
+    "sqlalchemy (==1.4.17)",
+    "psycopg2 (==2.9.11)",
+    "pydantic (==2.11.7)",
+    "passlib (==1.7.4)",
+    "python-jose (==3.5.0)",
+    "pandas (==2.2.3)",
+    "uvicorn (==0.42.0)",
+    "scikit-learn (==1.5.2)",
+    "numpy (==1.26.0)",
+    "python-dotenv (>=1.2.2,<2.0.0)",
+    "python-multipart (==0.0.20)",
+    "pytest (==8.4.1)",
+    "httpx (==0.28.1)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"

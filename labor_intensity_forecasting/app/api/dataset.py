@@ -1,39 +1,107 @@
-from fastapi import APIRouter, Query, UploadFile, File
+from fastapi import (
+    APIRouter,
+    Query,
+    UploadFile,
+    File,
+    HTTPException
+)
+
+from app.db.core.session import SQLDataBase
+
+from app.services.dataset import DatasetService
+
+from app.schemas.dataset import (
+    FeaturesSaveRequest
+)
 
 router = APIRouter(
     prefix="/dataset",
     tags=["Dataset"]
 )
 
+def get_service():
+
+    database = SQLDataBase()
+
+    database.create_session()
+
+    return database
 
 @router.get("")
 async def dataset():
 
     """
-    Получить датасет
+    Получить информацию о датасете.
     """
 
-    pass
+    database = get_service()
+
+    try:
+
+        service = DatasetService(
+            database.session
+        )
+
+        return service.get_dataset()
+
+    finally:
+
+        database.session.close()
 
 
 @router.get("/features")
 async def features():
 
     """
-    Получить список признаков
+    Получить список признаков.
     """
 
-    pass
+    database = get_service()
+
+    try:
+
+        service = DatasetService(
+            database.session
+        )
+
+        return service.get_features()
+
+    finally:
+
+        database.session.close()
 
 
 @router.post("/features")
-async def save_features():
+async def save_features(request: FeaturesSaveRequest):
 
     """
-    Сохранить выбранные признаки
+    Сохранить выбранные признаки.
     """
 
-    pass
+    database = get_service()
+
+    try:
+
+        service = DatasetService(
+            database.session
+        )
+
+        return service.save_features(
+            request.feature_names
+        )
+
+    except Exception as exception:
+
+        database.session.rollback()
+
+        raise HTTPException(
+            status_code=500,
+            detail=str(exception)
+        )
+
+    finally:
+
+        database.session.close()
 
 @router.get("/operations")
 async def operations(
@@ -44,12 +112,28 @@ async def operations(
     """
     Получить операции постранично.
 
-    page - номер страницы.
+    page — номер страницы.
 
-    size - размер страницы.
+    size — количество записей.
     """
 
-    pass
+    database = get_service()
+
+    try:
+
+        service = DatasetService(
+            database.session
+        )
+
+        return service.get_operations(
+            page,
+            size
+        )
+
+    finally:
+
+        database.session.close()
+
 
 
 @router.post("/operations/import-csv")
@@ -58,7 +142,76 @@ async def import_csv(
 ):
 
     """
-    Импорт CSV файла в таблицу operations.
+    Импорт CSV файла
+    в таблицу operations.
     """
 
-    pass
+    # ---------------------------------------------------------
+    # Проверяем расширение
+    # ---------------------------------------------------------
+
+    if not file.filename:
+
+        raise HTTPException(
+            status_code=400,
+            detail="Файл не указан"
+        )
+
+    if not file.filename.lower().endswith(
+        ".csv"
+    ):
+
+        raise HTTPException(
+            status_code=400,
+            detail="Необходимо загрузить CSV-файл"
+        )
+
+    # ---------------------------------------------------------
+    # Читаем файл
+    # ---------------------------------------------------------
+
+    content = await file.read()
+
+    if not content:
+
+        raise HTTPException(
+            status_code=400,
+            detail="CSV-файл пуст"
+        )
+
+    database = get_service()
+
+    try:
+
+        service = DatasetService(
+            database.session
+        )
+
+        return service.import_csv(
+            content
+        )
+
+    except ValueError as exception:
+
+        database.session.rollback()
+
+        raise HTTPException(
+            status_code=400,
+            detail=str(exception)
+        )
+
+    except Exception as exception:
+
+        database.session.rollback()
+
+        raise HTTPException(
+            status_code=500,
+            detail=(
+                "Ошибка импорта CSV: "
+                + str(exception)
+            )
+        )
+
+    finally:
+
+        database.session.close()
