@@ -1,7 +1,7 @@
 import math
 import csv
 import io
-import uuid
+from app.db.core.support.UUIDClass import UUIDClass
 
 from datetime import datetime
 
@@ -255,7 +255,7 @@ class DatasetService:
 
                 id=(
                     row.get("id")
-                    or str(uuid.uuid4())
+                    or UUIDClass.geterateUUIDWithout_()
                 ),
 
                 nomenclature=self._text(
