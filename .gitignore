@@ -3,3 +3,4 @@ __pycache__/
 venv
 analysis_of_questionnaires/data
 analysis_of_questionnaires/results
+weights
