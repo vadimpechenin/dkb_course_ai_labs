@@ -2,6 +2,7 @@ import os
 import json
 from app.db.core.support.UUIDClass import UUIDClass
 import pickle
+import pandas as pd
 
 import joblib
 
@@ -394,60 +395,61 @@ class ForecastService:
         self,
         item: ForecastInput
     ):
-
-        values = []
-
+        # 1. Собираем исходный словарь признаков
+        row = {}
         for feature in self.feature_list:
+            value = getattr(item, feature, None)
+            row[feature] = self._prepare_feature(feature, value)
 
-            value = getattr(
-                item,
-                feature,
-                None
-            )
+        # 2. Создаем DataFrame
+        X_raw = pd.DataFrame([row], columns=self.feature_list)
 
-            values.append(
-                self._prepare_feature(
-                    feature,
-                    value
-                )
-            )
+        # 3. Приводим типы к тем, что были при обучении, чтобы избежать ошибок SimpleImputer
+        cat_cols = self.training_run.training_config["categorical_features"]
+        num_cols = self.training_run.training_config["numerical_features"]
 
-        X = np.array(
-            [values],
-            dtype=object
-        )
+        # 4. Обрабатываем КАТЕГОРИАЛЬНЫЕ признаки
+        X_cat = X_raw[cat_cols].copy()
+        for col in cat_cols:
+            X_cat[col] = X_cat[col].astype(str)
 
-        # -----------------------------------------------------
-        # Encoder
-        # -----------------------------------------------------
+        # Применяем SimpleImputer для категорий (эквивалент вашего пайплайна обучения)
+        # Если импутер не сохранен отдельно, заполняем строку вручную, как в вашем коде:
+        X_cat = X_cat.fillna("missing")
 
         if self.encoder is not None:
+            # Теперь OneHotEncoder получит ровно свои 7 колонок
+            X_cat_transformed = self.encoder.transform(X_cat)
+            # Если энкодер возвращает разряженную матрицу, переводим в массив
+            if hasattr(X_cat_transformed, "toarray"):
+                X_cat_transformed = X_cat_transformed.toarray()
+        else:
+            X_cat_transformed = X_cat.to_numpy()
 
-            try:
+        # 5. Обрабатываем ЧИСЛОВЫЕ признаки
+        X_num = X_raw[num_cols].copy()
+        for col in num_cols:
+            X_num[col] = pd.to_numeric(X_num[col], errors='coerce')
 
-                X = self.encoder.transform(
-                    X
-                )
-
-            except Exception:
-
-                # Некоторые энкодеры ожидают
-                # DataFrame.
-                X = self.encoder.transform(
-                    [values]
-                )
-
-        # -----------------------------------------------------
-        # Scaler
-        # -----------------------------------------------------
+        # Применяем SimpleImputer для чисел (эквивалент медианы)
+        # Если нет объекта imputer, можно использовать медианы из параметров или заполнить нулями/средним
+        # В идеале numeric_transformer содержал Imputer(strategy="median").
+        # Если вы сохранили в self.scaler чистый StandardScaler, то imputer нужно сымитировать:
+        X_num = X_num.fillna(0)  # Временная заглушка, если нет сохраненного imputer
 
         if self.scaler is not None:
+            X_num_transformed = self.scaler.transform(X_num)
+        else:
+            X_num_transformed = X_num.to_numpy()
 
-            X = self.scaler.transform(
-                X
-            )
+        # 6. Объединяем числовые и категориальные признаки обратно в один массив
+        # В вашем ColumnTransformer порядок был: сначала "num", потом "cat"
+        X_final = np.hstack([X_num_transformed, X_cat_transformed])
 
-        return X
+        # ПРИМЕЧАНИЕ: Если вы сохранили весь Pipeline целиком (включая препроцессор и модель),
+        # то в методе forecast() вы сможете сразу вызвать `self.pipeline.predict(X)`,
+        # и этот шаг трансформации вручную делать вообще не придется.
+        return X_final
 
     # =========================================================
     # FEATURE PREPARATION
