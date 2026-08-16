@@ -29,9 +29,7 @@ class ForecastService:
             session
         )
 
-        self.model = None
-
-        self.scaler = None
+        self.pipeline = None
 
         self.encoder = None
 
@@ -240,34 +238,22 @@ class ForecastService:
                 "Файл активной модели не найден"
             )
 
+
         # -----------------------------------------------------
-        # Модель
+        # Загружаем ПОЛНЫЙ pipeline
         # -----------------------------------------------------
 
-        self.model = self._load_file(
+        self.pipeline = self._load_file(
             self.model_file.weights_path
         )
 
         # -----------------------------------------------------
-        # Scaler
+        # Загружаем ПОЛНЫЙ pipeline
         # -----------------------------------------------------
 
-        if self.model_file.scaler_path:
-
-            self.scaler = self._load_file(
-                self.model_file.scaler_path
-            )
-
-        # -----------------------------------------------------
-        # Encoder
-        # -----------------------------------------------------
-
-        if self.model_file.encoder_path:
-
-            self.encoder = self._load_file(
-                self.model_file.encoder_path
-            )
-
+        self.encoder = self._load_file(
+            self.model_file.encoder_path
+        )
         # -----------------------------------------------------
         # Список признаков
         # -----------------------------------------------------
@@ -293,6 +279,11 @@ class ForecastService:
                 for feature in features
 
             ]
+
+        if not self.feature_list:
+            raise RuntimeError(
+                "Список признаков модели пуст"
+            )
 
     # =========================================================
     # LOAD FILE
@@ -401,55 +392,17 @@ class ForecastService:
             value = getattr(item, feature, None)
             row[feature] = self._prepare_feature(feature, value)
 
-        # 2. Создаем DataFrame
-        X_raw = pd.DataFrame([row], columns=self.feature_list)
+        # Создаем входной dataframe
+        # Очень важно:
+        # порядок колонок соответствует
+        # features.json
 
-        # 3. Приводим типы к тем, что были при обучении, чтобы избежать ошибок SimpleImputer
-        cat_cols = self.training_run.training_config["categorical_features"]
-        num_cols = self.training_run.training_config["numerical_features"]
+        X = pd.DataFrame(
+            [row],
+            columns=self.feature_list
+        )
 
-        # 4. Обрабатываем КАТЕГОРИАЛЬНЫЕ признаки
-        X_cat = X_raw[cat_cols].copy()
-        for col in cat_cols:
-            X_cat[col] = X_cat[col].astype(str)
-
-        # Применяем SimpleImputer для категорий (эквивалент вашего пайплайна обучения)
-        # Если импутер не сохранен отдельно, заполняем строку вручную, как в вашем коде:
-        X_cat = X_cat.fillna("missing")
-
-        if self.encoder is not None:
-            # Теперь OneHotEncoder получит ровно свои 7 колонок
-            X_cat_transformed = self.encoder.transform(X_cat)
-            # Если энкодер возвращает разряженную матрицу, переводим в массив
-            if hasattr(X_cat_transformed, "toarray"):
-                X_cat_transformed = X_cat_transformed.toarray()
-        else:
-            X_cat_transformed = X_cat.to_numpy()
-
-        # 5. Обрабатываем ЧИСЛОВЫЕ признаки
-        X_num = X_raw[num_cols].copy()
-        for col in num_cols:
-            X_num[col] = pd.to_numeric(X_num[col], errors='coerce')
-
-        # Применяем SimpleImputer для чисел (эквивалент медианы)
-        # Если нет объекта imputer, можно использовать медианы из параметров или заполнить нулями/средним
-        # В идеале numeric_transformer содержал Imputer(strategy="median").
-        # Если вы сохранили в self.scaler чистый StandardScaler, то imputer нужно сымитировать:
-        X_num = X_num.fillna(0)  # Временная заглушка, если нет сохраненного imputer
-
-        if self.scaler is not None:
-            X_num_transformed = self.scaler.transform(X_num)
-        else:
-            X_num_transformed = X_num.to_numpy()
-
-        # 6. Объединяем числовые и категориальные признаки обратно в один массив
-        # В вашем ColumnTransformer порядок был: сначала "num", потом "cat"
-        X_final = np.hstack([X_num_transformed, X_cat_transformed])
-
-        # ПРИМЕЧАНИЕ: Если вы сохранили весь Pipeline целиком (включая препроцессор и модель),
-        # то в методе forecast() вы сможете сразу вызвать `self.pipeline.predict(X)`,
-        # и этот шаг трансформации вручную делать вообще не придется.
-        return X_final
+        return X
 
     # =========================================================
     # FEATURE PREPARATION
@@ -473,10 +426,10 @@ class ForecastService:
 
     def _predict(
         self,
-        X
+        X: pd.DataFrame
     ):
 
-        result = self.model.predict(
+        result = self.pipeline.predict(
             X
         )
 
@@ -496,13 +449,13 @@ class ForecastService:
         # -----------------------------------------------------
 
         if hasattr(
-            self.model,
+            self.pipeline,
             "predict_std"
         ):
 
             try:
 
-                value = self.model.predict_std()
+                value = self.pipeline.predict_std()
 
                 return float(
                     np.asarray(value)

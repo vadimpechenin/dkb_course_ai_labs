@@ -36,3 +36,7 @@ class ForecastResult(BaseModel):
     forecast: float
 
     std: float
+
+class ForecastResponse(BaseModel):
+
+    results: list[ForecastResult]

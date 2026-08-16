@@ -81,7 +81,7 @@ class ForecastCRUD:
                 FeatureSetting.enabled == True
             )
             .order_by(
-                FeatureSetting.feature_order
+                FeatureSetting.feature_order.asc()
             )
             .all()
         )
