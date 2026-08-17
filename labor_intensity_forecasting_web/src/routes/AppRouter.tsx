@@ -2,6 +2,7 @@ import {BrowserRouter,Routes,Route, Navigate } from "react-router-dom";
 
 
 import DashboardPage from "../pages/DashboardPage";
+import SettingsPage from "../pages/SettingsPage";
 /*
 import TrainingPage from "../pages/TrainingPage";
 
@@ -13,7 +14,7 @@ import ExperimentsPage from "../pages/ExperimentsPage";
 
 import PredictionHistoryPage from "../pages/PredictionHistoryPage";
 
-import SettingsPage from "../pages/SettingsPage";
+
 
 import AboutPage from "../pages/AboutPage";
 
@@ -40,7 +41,15 @@ export default function AppRouter(){
             <Routes>
                 <Route path="/" element={<Navigate to="/dashboard" replace />} />
 
-                <Route path="/dashboard" element={<DashboardPage/>}/>
+                <Route
+                    path="/dashboard"
+                    element={<DashboardPage/>}
+                />
+
+                <Route
+                    path="/settings"
+                    element={<SettingsPage/>}
+                />
 
             </Routes>
 

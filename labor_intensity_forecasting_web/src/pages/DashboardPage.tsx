@@ -40,16 +40,16 @@ export default function DashboardPage() {
                 sx={{ mt: 2 }}
             >
 
-                <Grid item xs={6}>
-
+                <Grid
+                    size={{ xs: 12, md: 6 }}
+                >
                     <ModelInfoCard dashboard={dashboard} />
-
                 </Grid>
 
-                <Grid item xs={6}>
-
+                <Grid
+                    size={{ xs: 12, md: 6 }}
+                >
                     <DatasetInfoCard dashboard={dashboard} />
-
                 </Grid>
 
             </Grid>

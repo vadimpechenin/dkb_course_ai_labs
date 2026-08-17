@@ -16,7 +16,7 @@ export default function DashboardCards({dashboard}:Props){
 
         <Grid container spacing={2}>
 
-            <Grid item xs={4}>
+            <Grid size={{ xs: 4}}>
 
                 <StatisticCard
                     title="Операций"
@@ -25,7 +25,7 @@ export default function DashboardCards({dashboard}:Props){
 
             </Grid>
 
-            <Grid item xs={4}>
+            <Grid size={{ xs: 4}}>
 
                 <StatisticCard
                     title="Признаков"
@@ -34,7 +34,7 @@ export default function DashboardCards({dashboard}:Props){
 
             </Grid>
 
-            <Grid item xs={4}>
+            <Grid size={{ xs: 4}}>
 
                 <StatisticCard
                     title="Активная модель"
@@ -43,7 +43,7 @@ export default function DashboardCards({dashboard}:Props){
 
             </Grid>
 
-            <Grid item xs={4}>
+            <Grid size={{ xs: 4}}>
 
                 <StatisticCard
                     title="MAE"
@@ -52,7 +52,7 @@ export default function DashboardCards({dashboard}:Props){
 
             </Grid>
 
-            <Grid item xs={4}>
+            <Grid size={{ xs: 4}}>
 
                 <StatisticCard
                     title="RMSE"
@@ -61,7 +61,7 @@ export default function DashboardCards({dashboard}:Props){
 
             </Grid>
 
-            <Grid item xs={4}>
+            <Grid size={{ xs: 4}}>
 
                 <StatisticCard
                     title="R²"
