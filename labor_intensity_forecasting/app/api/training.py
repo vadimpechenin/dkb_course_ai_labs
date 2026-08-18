@@ -42,6 +42,13 @@ async def retrain(
 
     """
     Переобучение модели.
+    Пользователь выбирает:
+
+    - модель;
+    - размер обучающей выборки;
+    - train/test;
+    - признаки;
+    - параметры модели.
     """
 
     database = SQLDataBase()
@@ -54,20 +61,7 @@ async def retrain(
             database.session
         )
 
-        result = service.retrain(
-
-            model_id=
-                request.model_id,
-
-            train_percent=
-                request.train_percent,
-
-            test_percent=
-                request.test_percent,
-
-            random_state=
-                request.random_state
-        )
+        result = service.retrain(request)
 
         return result
 

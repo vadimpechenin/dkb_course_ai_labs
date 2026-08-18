@@ -18,7 +18,19 @@ class TestTrainingAPI:
         payload = {
             "model_id": "ef64ff7e9232406b9293db85741ba1b0",
             "train_percent": 80,
-            "test_percent": 20
+            "test_percent": 20,
+            "dataset_size":1500,
+            "features": ["detail_mass",
+            "blank_length",
+            "work_center",
+            "operation",
+            "material",
+            "nomenclature",
+            "note",
+            "user_name",
+            "fill_date",
+            "row_number"],
+            "model_params":{"n_estimators":100,"max_depth": 20, "min_samples_split": 2,"min_samples_leaf": 2}
         }
         response = client.post(
             "/retrain",

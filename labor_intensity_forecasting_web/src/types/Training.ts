@@ -2,6 +2,11 @@ export interface TrainingRequest {
     model_id: string;
     train_percent: number;
     test_percent: number;
+    dataset_size: number;
+
+    features: string[];
+
+    model_params: Record<string, any>;
 }
 
 
@@ -11,11 +16,16 @@ export interface TrainingResponse {
 
     message?: string;
 
-    training_run_id?: string;
+    training_run_id: string;
 
-    mae?: number;
+    metrics?: {
 
-    rmse?: number;
+        mae?: number;
 
-    r2?: number;
+        rmse?: number;
+
+        r2?: number;
+
+    };
+
 }

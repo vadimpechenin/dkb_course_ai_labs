@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, Dict, Any, List
 
 
 class RetrainRequest(BaseModel):
@@ -19,6 +19,19 @@ class RetrainRequest(BaseModel):
         20,
         ge=5,
         le=50
+    )
+    dataset_size: int = Field(
+        ...,
+        gt=0
+    )
+
+    features: List[str] = Field(
+        ...,
+        min_length=1
+    )
+
+    model_params: Dict[str, Any] = Field(
+        default_factory=dict
     )
 
     random_state: int = 42

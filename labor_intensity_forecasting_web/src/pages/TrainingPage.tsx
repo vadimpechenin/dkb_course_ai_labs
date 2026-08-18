@@ -5,10 +5,12 @@ import Typography from "@mui/material/Typography";
 import Divider from "@mui/material/Divider";
 import Box from "@mui/material/Box";
 
-import AppLayout from "../components/layout/AppLayout";
+import AppLayout
+    from "../components/layout/AppLayout";
 
-import TrainingForm
-    from "../components/training/TrainingForm";
+import TrainingForm, {
+    type TrainingRequest
+} from "../components/training/TrainingForm";
 
 import TrainingActions
     from "../components/training/TrainingActions";
@@ -41,27 +43,41 @@ export default function TrainingPage() {
     }
 
 
+    // --------------------------------------------------
+    // RETRAIN
+    // --------------------------------------------------
+
     async function handleRetrain(
-        modelId: string,
-        trainPercent: number,
-        testPercent: number
+        request: TrainingRequest
     ) {
 
         try {
 
             setLoading(true);
+
             clearMessages();
+
 
             const result =
                 await retrain({
 
-                    model_id: modelId,
+                    model_id:
+                    request.model_id,
+
+                    dataset_size:
+                    request.dataset_size,
 
                     train_percent:
-                    trainPercent,
+                    request.train_percent,
 
                     test_percent:
-                    testPercent
+                    request.test_percent,
+
+                    features:
+                    request.features,
+
+                    model_params:
+                    request.model_params
 
                 });
 
@@ -98,23 +114,32 @@ export default function TrainingPage() {
             setLoading(false);
 
         }
+
     }
 
+
+    // --------------------------------------------------
+    // ROLLBACK
+    // --------------------------------------------------
 
     async function handleRollback() {
 
         try {
 
             setLoading(true);
+
             clearMessages();
+
 
             const result =
                 await rollback();
 
+
             if (result) {
 
                 setMessage(
-                    "Модель успешно возвращена к предыдущей версии."
+                    "Модель успешно возвращена " +
+                    "к предыдущей версии."
                 );
 
             } else {
@@ -141,15 +166,22 @@ export default function TrainingPage() {
             setLoading(false);
 
         }
+
     }
 
+
+    // --------------------------------------------------
+    // EXPORT
+    // --------------------------------------------------
 
     async function handleExport() {
 
         try {
 
             setLoading(true);
+
             clearMessages();
+
 
             const blob =
                 await exportModel();
@@ -164,6 +196,7 @@ export default function TrainingPage() {
             const link =
                 document.createElement("a");
 
+
             link.href = url;
 
             link.download =
@@ -177,6 +210,7 @@ export default function TrainingPage() {
             link.click();
 
             link.remove();
+
 
             window.URL.revokeObjectURL(
                 url
@@ -203,8 +237,13 @@ export default function TrainingPage() {
             setLoading(false);
 
         }
+
     }
 
+
+    // --------------------------------------------------
+    // IMPORT
+    // --------------------------------------------------
 
     async function handleImport(
         file: File
@@ -213,7 +252,9 @@ export default function TrainingPage() {
         try {
 
             setLoading(true);
+
             clearMessages();
+
 
             const result =
                 await importModel(file);
@@ -249,8 +290,13 @@ export default function TrainingPage() {
             setLoading(false);
 
         }
+
     }
 
+
+    // --------------------------------------------------
+    // UI
+    // --------------------------------------------------
 
     return (
 
@@ -289,12 +335,16 @@ export default function TrainingPage() {
 
 
             <TrainingForm
-                onRetrain={handleRetrain}
+                onRetrain={
+                    handleRetrain
+                }
                 loading={loading}
             />
 
 
-            <Divider sx={{ my: 4 }} />
+            <Divider
+                sx={{ my: 4 }}
+            />
 
 
             <Typography

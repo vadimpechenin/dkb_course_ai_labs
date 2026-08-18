@@ -44,19 +44,14 @@ class TrainingCRUD:
     # =========================================================
 
     def get_enabled_features(self):
-
-        return (
-            self.session.query(
+        res = self.session.query(
                 FeatureSetting
-            )
-            .filter(
+            ).filter(
                 FeatureSetting.enabled == True
-            )
-            .order_by(
+            ).order_by(
                 FeatureSetting.feature_order
-            )
-            .all()
-        )
+            ).all()
+        return res
 
     # =========================================================
     # DATASET
@@ -74,6 +69,28 @@ class TrainingCRUD:
             .all()
         )
 
+    def get_operations_size(self):
+        result =  self.session.query(
+                Operation
+            ).filter(
+                Operation.target_hours.isnot(None)
+            ).count()
+        return result
+
+    def get_operations_sample(self, dataset_size):
+        return (
+            self.session.query(
+                Operation
+            )
+            .filter(
+                Operation.target_hours.isnot(None)
+            )
+            .order_by(
+                __import__("sqlalchemy").func.random()
+            )
+            .limit(dataset_size)
+            .all()
+        )
     # =========================================================
     # TRAINING RUN
     # =========================================================

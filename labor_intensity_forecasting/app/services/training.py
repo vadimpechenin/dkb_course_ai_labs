@@ -27,6 +27,7 @@ from sklearn.ensemble import RandomForestRegressor
 
 from app.crud.training import TrainingCRUD
 from app.core.settings import WEIGHTS_DIR
+from app.services.model_factory import ModelFactory
 
 
 class TrainingService:
@@ -45,17 +46,14 @@ class TrainingService:
 
     def retrain(
         self,
-        model_id,
-        train_percent=80,
-        test_percent=20,
-        random_state=42
+        request
     ):
 
         # -----------------------------------------------------
         # Проверяем проценты
         # -----------------------------------------------------
 
-        if train_percent + test_percent != 100:
+        if request.train_percent + request.test_percent != 100:
 
             raise ValueError(
                 "train_percent + test_percent "
@@ -67,47 +65,67 @@ class TrainingService:
         # -----------------------------------------------------
 
         model_info = self.crud.get_model(
-            model_id
+            request.model_id
         )
 
         if model_info is None:
 
             raise ValueError(
-                f"Модель {model_id} не найдена"
+                f"Модель {request.model_id} не найдена"
             )
 
         # -----------------------------------------------------
         # Получаем признаки
         # -----------------------------------------------------
+        if not request.features:
+            raise ValueError(
+                "Не выбрано ни одного признака"
+            )
 
         feature_objects = (
             self.crud.get_enabled_features()
         )
 
-        if not feature_objects:
+        features_all = [item.feature_name for item in feature_objects]
 
+        invalid_features = (
+                set(request.features)
+                - set(features_all)
+        )
+
+        if invalid_features:
             raise ValueError(
-                "Не выбрано ни одного признака"
+                f"Неизвестные признаки: "
+                f"{', '.join(invalid_features)}"
             )
 
-        features = [
-            item.feature_name
-            for item in feature_objects
-        ]
+        # --------------------------------------------------
+        # 3. Получаем размер датасета
+        # --------------------------------------------------
 
+        total_count = (
+            self.crud.get_operations_size()
+        )
+        if total_count == 0:
+            raise ValueError(
+                "В таблице operations нет данных "
+                "для обучения"
+            )
+        dataset_size = min(
+            request.dataset_size,
+            total_count
+        )
         # -----------------------------------------------------
         # Получаем dataset
         # -----------------------------------------------------
 
         operations = (
-            self.crud.get_operations()
+            self.crud.get_operations_sample(dataset_size)
         )
 
         if not operations:
-
             raise ValueError(
-                "В таблице operations нет данных "
-                "для обучения"
+                "Не удалось получить данные"
             )
 
         rows = []
@@ -116,8 +134,7 @@ class TrainingService:
 
             row = {}
 
-            for feature in features:
-
+            for feature in request.features:
                 row[feature] = getattr(
                     operation,
                     feature,
@@ -165,7 +182,7 @@ class TrainingService:
         # -----------------------------------------------------
 
         X = df[
-            features
+            request.features
         ].copy()
 
         y = df[
@@ -261,11 +278,9 @@ class TrainingService:
         # Модель
         # -----------------------------------------------------
 
-        estimator = (
-            self._create_model(
-                model_info.name,
-                random_state
-            )
+        estimator = ModelFactory.create(
+            model_info.name,
+            request.model_params
         )
 
         pipeline = Pipeline([
@@ -287,7 +302,7 @@ class TrainingService:
         # -----------------------------------------------------
 
         test_size = (
-            test_percent / 100
+            request.test_percent / 100
         )
 
         X_train, X_test, y_train, y_test = (
@@ -295,7 +310,7 @@ class TrainingService:
                 X,
                 y,
                 test_size=test_size,
-                random_state=random_state
+                random_state=request.random_state
             )
         )
 
@@ -354,16 +369,16 @@ class TrainingService:
                 model_info.name,
 
             "train_percent":
-                train_percent,
+                request.train_percent,
 
             "test_percent":
-                test_percent,
+                request.test_percent,
 
             "random_state":
-                random_state,
+                request.random_state,
 
             "features":
-                features,
+                request.features,
 
             "categorical_features":
                 categorical_cols,
@@ -384,7 +399,7 @@ class TrainingService:
         training_run = (
             self.crud.create_training_run(
 
-                model_id=model_id,
+                model_id=request.model_id,
 
                 dataset_size=len(df),
 
@@ -549,7 +564,7 @@ class TrainingService:
                 {
 
                     "features":
-                        features,
+                        request.features,
 
                     "categorical_features":
                         categorical_cols,
@@ -576,7 +591,7 @@ class TrainingService:
                 training_run.id,
 
             model_id=
-                model_id,
+                request.model_id,
 
             version=
                 version,
