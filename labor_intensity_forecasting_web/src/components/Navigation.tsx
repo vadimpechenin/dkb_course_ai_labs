@@ -39,6 +39,17 @@ export default function Navigation(){
 
                 </ListItemButton>
 
+                <ListItemButton>
+
+                    <ListItemText primary="История"/>
+
+                </ListItemButton>
+
+                <ListItemButton>
+
+                    <ListItemText primary="Настройки"/>
+
+                </ListItemButton>
             </List>
 
         </Drawer>
