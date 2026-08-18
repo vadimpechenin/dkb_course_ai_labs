@@ -3,10 +3,12 @@ import {BrowserRouter,Routes,Route, Navigate } from "react-router-dom";
 
 import DashboardPage from "../pages/DashboardPage";
 import SettingsPage from "../pages/SettingsPage";
-/*
-import TrainingPage from "../pages/TrainingPage";
-
 import ForecastPage from "../pages/ForecastPage";
+import TrainingPage from "../pages/TrainingPage";
+/*
+
+
+
 
 import DatasetPage from "../pages/DatasetPage";
 
@@ -50,7 +52,15 @@ export default function AppRouter(){
                     path="/settings"
                     element={<SettingsPage/>}
                 />
+                <Route
+                    path="/forecast"
+                    element={<ForecastPage />}
+                />
 
+                <Route
+                    path="/training"
+                    element={<TrainingPage />}
+                />
             </Routes>
 
         </BrowserRouter>
