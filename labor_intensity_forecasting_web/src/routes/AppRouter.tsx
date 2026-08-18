@@ -5,6 +5,8 @@ import DashboardPage from "../pages/DashboardPage";
 import SettingsPage from "../pages/SettingsPage";
 import ForecastPage from "../pages/ForecastPage";
 import TrainingPage from "../pages/TrainingPage";
+import DatasetPage from "../pages/DatasetPage";
+import ModelsPage from "../pages/ModelsPage";
 /*
 
 
@@ -47,7 +49,19 @@ export default function AppRouter(){
                     path="/dashboard"
                     element={<DashboardPage/>}
                 />
+                <Route
+                    path="/dataset"
+                    element={
+                        <DatasetPage />
+                    }
+                />
 
+                <Route
+                    path="/models"
+                    element={
+                        <ModelsPage />
+                    }
+                />
                 <Route
                     path="/settings"
                     element={<SettingsPage/>}

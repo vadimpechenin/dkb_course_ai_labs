@@ -53,7 +53,7 @@ export default function NavigationDrawer() {
 
                 </ListItemButton>
 
-                <ListItemButton component={Link} to="/experiments">
+                <ListItemButton component={Link} to="/models">
 
                     <ListItemText primary="Эксперименты"/>
 
@@ -65,7 +65,7 @@ export default function NavigationDrawer() {
 
                 </ListItemButton>
 
-                <ListItemButton component={Link} to="/history">
+                <ListItemButton component={Link} to="/predictions">
 
                     <ListItemText primary="История"/>
 
