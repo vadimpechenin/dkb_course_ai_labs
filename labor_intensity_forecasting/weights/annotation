@@ -3,29 +3,27 @@
 weights/
 │
 ├── random_forest/
-│   ├── current/
+│   ├── training_run_id/
 │   │   ├── model.joblib
 │   │   ├── scaler.joblib
 │   │   ├── encoder.joblib
 │   │   └── features.json
-│   └── archive/
-│       ├── v1/
-│       ├── v2/
-│       └── v3/
+│   └── training_run_id/
+│       ├── 
 │
 ├── mlp/
-│   ├── current/
+│   ├── training_run_id/
 │   │   ├── model.pt
 │   │   ├── scaler.joblib
 │   │   ├── encoder.joblib
 │   │   └── features.json
-│   └── archive/
+│   └── training_run_id/
 │
 ├── xgboost/
-│   └── current/
+│   └── training_run_id/
 │
 ├── catboost/
-│   └── current/
+│   └── training_run_id/
 │
 └── linear_regression/
-    └── current/
+    └── training_run_id/

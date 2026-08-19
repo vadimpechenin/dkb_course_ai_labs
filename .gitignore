@@ -4,3 +4,5 @@ venv
 analysis_of_questionnaires/data
 analysis_of_questionnaires/results
 weights
+labor_intensity_forecasting/weights/*
+!labor_intensity_forecasting/weights/annotation

@@ -11,5 +11,5 @@ load_dotenv()
 
 CORS_ORIGINS = os.getenv("CORS_ORIGINS", "")
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))#os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 WEIGHTS_DIR = os.getenv("WEIGHTS_DIR", os.path.join(BASE_DIR, "../..", "weights"))
