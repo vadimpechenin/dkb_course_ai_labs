@@ -7,3 +7,8 @@ export interface HealthStatus {
     database: string;
     message?: string;
 }
+
+export interface ResetResponse {
+    success: boolean;
+    message: string;
+}

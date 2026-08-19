@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 
 from app.db.core.session import SQLDataBase
 
@@ -68,6 +68,37 @@ async def health():
             "database": "error",
             "message": str(exception)
         }
+
+    finally:
+
+        database.session.close()
+
+@router.post("/reset")
+async def reset_database():
+
+    """
+    Полное восстановление базы данных
+    в исходное состояние.
+    """
+
+    database = get_database()
+
+    try:
+
+        service = SettingsService(
+            database.session
+        )
+
+        result = service.reset_database()
+
+        return result
+
+    except Exception as exception:
+
+        raise HTTPException(
+            status_code=500,
+            detail=str(exception)
+        )
 
     finally:
 

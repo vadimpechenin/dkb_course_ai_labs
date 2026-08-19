@@ -10,6 +10,8 @@ import AppLayout from "../components/layout/AppLayout";
 
 import SettingsCard from "../components/settings/SettingsCard";
 import HealthStatusCard from "../components/settings/HealthStatusCard";
+import ResetDatabaseCard
+    from "../components/settings/ResetDatabaseCard";
 
 import {
     getSettings,
@@ -161,6 +163,7 @@ export default function SettingsPage() {
                 </Grid>
 
             </Grid>
+            <ResetDatabaseCard />
 
         </AppLayout>
     );
