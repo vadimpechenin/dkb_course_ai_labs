@@ -40,7 +40,10 @@ export default function TrainingInfo({dashboard}:Props){
 
                 Время обучения:
 
-                {dashboard.trainingTime} сек
+                {dashboard.trainingTime !== null &&
+                dashboard.trainingTime !== undefined
+                    ? dashboard.trainingTime.toFixed(2)
+                    : "-"} сек
 
             </Typography>
 

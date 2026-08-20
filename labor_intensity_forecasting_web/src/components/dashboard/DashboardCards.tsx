@@ -10,6 +10,18 @@ interface Props{
 
 }
 
+function formatNumber(
+    value: number | null | undefined,
+    digits = 3
+): string {
+
+    if (value === null || value === undefined) {
+        return "-";
+    }
+
+    return value.toFixed(digits);
+}
+
 export default function DashboardCards({dashboard}:Props){
 
     return(
@@ -47,7 +59,7 @@ export default function DashboardCards({dashboard}:Props){
 
                 <StatisticCard
                     title="MAE"
-                    value={dashboard.mae.toFixed(3)}
+                    value={formatNumber(dashboard.mae)}
                 />
 
             </Grid>
@@ -56,7 +68,7 @@ export default function DashboardCards({dashboard}:Props){
 
                 <StatisticCard
                     title="RMSE"
-                    value={dashboard.rmse.toFixed(3)}
+                    value={formatNumber(dashboard.rmse)}
                 />
 
             </Grid>
@@ -65,7 +77,7 @@ export default function DashboardCards({dashboard}:Props){
 
                 <StatisticCard
                     title="R²"
-                    value={dashboard.r2.toFixed(3)}
+                    value={formatNumber(dashboard.r2)}
                 />
 
             </Grid>

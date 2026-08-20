@@ -1,3 +1,4 @@
+from typing import Optional
 from pydantic import BaseModel
 
 
@@ -28,12 +29,9 @@ class DashboardResponse(BaseModel):
 
     lastTraining: str
 
-    mae: float
-
-    rmse: float
-
-    r2: float
-
-    trainingTime: float
+    mae: Optional[float] = None
+    rmse: Optional[float] = None
+    r2: Optional[float] = None
+    trainingTime: Optional[float] = None
 
     history: list[RMSEHistory]

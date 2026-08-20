@@ -42,7 +42,7 @@ export default function ModelInfoCard({ dashboard }: Props) {
 
                     <Typography>
 
-                        {dashboard.activeModel}
+                        {dashboard.activeModel || "-"}
 
                     </Typography>
 
@@ -58,7 +58,7 @@ export default function ModelInfoCard({ dashboard }: Props) {
 
                     <Typography>
 
-                        {dashboard.framework}
+                        {dashboard.framework || "-"}
 
                     </Typography>
 
@@ -79,7 +79,7 @@ export default function ModelInfoCard({ dashboard }: Props) {
                         }}
                     >
 
-                        {dashboard.weightsPath}
+                        {dashboard.weightsPath || "-"}
 
                     </Typography>
 

@@ -15,17 +15,21 @@ class DashboardCRUD:
 
     def get_operations_count(self):
 
-        return self.session.query(
+        return (self.session.query(
             func.count(Operation.id)
         ).scalar()
+                or 0
+                )
 
     def get_features_count(self):
 
-        return self.session.query(
+        return (self.session.query(
             func.count(FeatureSetting.id)
         ).filter(
             FeatureSetting.enabled == True
         ).scalar()
+                or 0
+    )
 
     def get_last_training(self):
 
@@ -36,25 +40,29 @@ class DashboardCRUD:
         ).first()
 
     def get_active_model(self):
-
-        return (
-            self.session.query(
-                MLModel,
-                ModelFile
-            )
-            .join(
-                ModelFile,
-                MLModel.id == ModelFile.model_id
-            )
-            .join(
-                TrainingRun,
-                TrainingRun.id == ModelFile.training_run_id
-            )
+        model = (
+            self.session.query(MLModel)
             .filter(
-                TrainingRun.is_active == True
+                MLModel.active == True
             )
             .first()
         )
+
+        if model is None:
+            return None, None
+
+        files = (
+            self.session.query(ModelFile)
+            .filter(
+                ModelFile.model_id == model.id
+            )
+            .order_by(
+                ModelFile.created_at.desc()
+            )
+            .first()
+        )
+
+        return model, files
 
     def get_history(self):
 
