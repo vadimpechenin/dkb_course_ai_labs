@@ -13,3 +13,4 @@ CORS_ORIGINS = os.getenv("CORS_ORIGINS", "")
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))#os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 WEIGHTS_DIR = os.getenv("WEIGHTS_DIR", os.path.join(BASE_DIR, "../..", "weights"))
+BACKUP_DIR = os.getenv("BACKUP_DIR", os.path.join(os.path.dirname(os.path.dirname(BASE_DIR)), "data","initial.tar.gz"))

@@ -9,7 +9,7 @@ weights/
 │   │   ├── encoder.joblib
 │   │   └── features.json
 │   └── training_run_id/
-│       ├── 
+│       ├──
 │
 ├── mlp/
 │   ├── training_run_id/
