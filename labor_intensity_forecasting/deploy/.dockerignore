@@ -1,0 +1,12 @@
+﻿.venv
+.gitignore
+.idea
+.git
+.vscode
+__pycache__
+*.pyc
+.pytest_cache
+.mypy_cache
+tests/
+README.md
+LICENSE
