@@ -1,0 +1,1 @@
+TRUNCATE TABLE training_runs, predictions, model_files CASCADE;

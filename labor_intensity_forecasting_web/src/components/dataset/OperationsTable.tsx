@@ -1,61 +1,68 @@
 import { useEffect, useState } from "react";
 
-import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
+import Paper from "@mui/material/Paper";
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableContainer from "@mui/material/TableContainer";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import TablePagination from "@mui/material/TablePagination";
 import Typography from "@mui/material/Typography";
-import FormGroup from "@mui/material/FormGroup";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Checkbox from "@mui/material/Checkbox";
-import Button from "@mui/material/Button";
-import Stack from "@mui/material/Stack";
-import Alert from "@mui/material/Alert";
+
 
 import {
-    getFeatures,
-    saveFeatures
+    getOperations
 } from "../../api/datasetApi";
 
-import type { Feature } from "../../types/Dataset";
+import type {
+    Operation
+} from "../../types/Dataset";
 
 
-export default function FeatureSelector() {
+export default function OperationsTable() {
 
-    const [features, setFeatures] =
-        useState<Feature[]>([]);
+    const [operations, setOperations] =
+        useState<Operation[]>([]);
+
+    const [page, setPage] =
+        useState(0);
+
+    const [rowsPerPage, setRowsPerPage] =
+        useState(20);
+
+    const [total, setTotal] =
+        useState(0);
 
     const [loading, setLoading] =
-        useState(true);
-
-    const [saving, setSaving] =
         useState(false);
 
-    const [message, setMessage] =
-        useState<string>();
 
-    const [error, setError] =
-        useState<string>();
-
-
-    async function loadFeatures() {
+    async function loadOperations() {
 
         try {
 
             setLoading(true);
 
-            const data =
-                await getFeatures();
+            const result =
+                await getOperations(
+                    page + 1,
+                    rowsPerPage
+                );
 
-            setFeatures(data);
+            setOperations(
+                result.items
+            );
+
+            setTotal(
+                result.total
+            );
 
         } catch (exception) {
 
             console.error(
-                "Ошибка загрузки признаков:",
+                "Ошибка загрузки операций:",
                 exception
-            );
-
-            setError(
-                "Не удалось загрузить признаки."
             );
 
         } finally {
@@ -68,189 +75,193 @@ export default function FeatureSelector() {
 
     useEffect(() => {
 
-        loadFeatures();
+        loadOperations();
 
-    }, []);
+    }, [page, rowsPerPage]);
 
 
-    function toggleFeature(
-        featureName: string
+    function changePage(
+        _: unknown,
+        newPage: number
     ) {
 
-        setFeatures(current =>
+        setPage(newPage);
 
-            current.map(feature =>
-
-                feature.feature_name === featureName
-                    ? {
-                        ...feature,
-                        enabled: !feature.enabled
-                    }
-                    : feature
-            )
-        );
     }
 
 
-    async function handleSave() {
+    function changeRowsPerPage(
+        event: React.ChangeEvent<HTMLInputElement>
+    ) {
 
-        try {
-
-            setSaving(true);
-            setMessage(undefined);
-            setError(undefined);
-
-            const selected =
-                features
-                    .filter(feature => feature.enabled)
-                    .map(feature => feature.feature_name);
-
-            const result =
-                await saveFeatures({
-                    features: selected
-                });
-
-            if (result.success) {
-
-                setMessage(
-                    result.message ??
-                    "Настройки признаков сохранены."
-                );
-
-            } else {
-
-                setError(
-                    result.message ??
-                    "Не удалось сохранить признаки."
-                );
-
-            }
-
-        } catch (exception) {
-
-            console.error(
-                "Ошибка сохранения признаков:",
-                exception
-            );
-
-            setError(
-                "Ошибка при сохранении признаков."
-            );
-
-        } finally {
-
-            setSaving(false);
-
-        }
-    }
-
-
-    if (loading) {
-
-        return (
-            <Typography>
-                Загрузка признаков...
-            </Typography>
+        setRowsPerPage(
+            Number(event.target.value)
         );
+
+        setPage(0);
+
     }
 
 
     return (
 
-        <Card sx={{ mb: 3 }}>
+        <Paper>
 
-            <CardContent>
+            <Typography
+                variant="h6"
+                sx={{ p: 2 }}
+            >
+                Операции
+            </Typography>
+
+
+            <TableContainer>
+
+                <Table
+                    size="small"
+                    stickyHeader
+                >
+
+                    <TableHead>
+
+                        <TableRow>
+
+                            <TableCell>
+                                Номенклатура
+                            </TableCell>
+
+                            <TableCell>
+                                Рабочий центр
+                            </TableCell>
+
+                            <TableCell>
+                                Операция
+                            </TableCell>
+
+                            <TableCell>
+                                Материал
+                            </TableCell>
+
+                            <TableCell>
+                                Масса детали
+                            </TableCell>
+
+                            <TableCell>
+                                Длина заготовки
+                            </TableCell>
+
+                            <TableCell>
+                                Нормочасы
+                            </TableCell>
+
+                        </TableRow>
+
+                    </TableHead>
+
+
+                    <TableBody>
+
+                        {operations.map(
+                            operation => (
+
+                                <TableRow
+                                    key={
+                                        operation.id
+                                    }
+                                >
+
+                                    <TableCell>
+                                        {
+                                            operation
+                                                .nomenclature
+                                        }
+                                    </TableCell>
+
+                                    <TableCell>
+                                        {
+                                            operation
+                                                .work_center
+                                        }
+                                    </TableCell>
+
+                                    <TableCell>
+                                        {
+                                            operation
+                                                .operation
+                                        }
+                                    </TableCell>
+
+                                    <TableCell>
+                                        {
+                                            operation
+                                                .material
+                                        }
+                                    </TableCell>
+
+                                    <TableCell>
+                                        {
+                                            operation
+                                                .detail_mass
+                                        }
+                                    </TableCell>
+
+                                    <TableCell>
+                                        {
+                                            operation
+                                                .blank_length
+                                        }
+                                    </TableCell>
+
+                                    <TableCell>
+                                        {
+                                            operation
+                                                .target_hours
+                                        }
+                                    </TableCell>
+
+                                </TableRow>
+
+                            )
+                        )}
+
+                    </TableBody>
+
+                </Table>
+
+            </TableContainer>
+
+
+            <TablePagination
+                component="div"
+                count={total}
+                page={page}
+                onPageChange={changePage}
+                rowsPerPage={
+                    rowsPerPage
+                }
+                onRowsPerPageChange={
+                    changeRowsPerPage
+                }
+                rowsPerPageOptions={[
+                    10,
+                    20,
+                    50,
+                    100
+                ]}
+                labelRowsPerPage="Строк на странице"
+            />
+
+
+            {loading && (
 
                 <Typography
-                    variant="h6"
-                    sx={{ mb: 2 }}
+                    sx={{ p: 2 }}
                 >
-                    Признаки модели
+                    Загрузка...
                 </Typography>
 
+            )}
 
-                {message && (
-
-                    <Alert
-                        severity="success"
-                        sx={{ mb: 2 }}
-                    >
-                        {message}
-                    </Alert>
-
-                )}
-
-
-                {error && (
-
-                    <Alert
-                        severity="error"
-                        sx={{ mb: 2 }}
-                    >
-                        {error}
-                    </Alert>
-
-                )}
-
-
-                <FormGroup>
-
-                    {features.map(feature => (
-
-                        <FormControlLabel
-                            key={feature.id}
-                            control={
-                                <Checkbox
-                                    checked={
-                                        feature.enabled
-                                    }
-                                    onChange={() =>
-                                        toggleFeature(
-                                            feature.feature_name
-                                        )
-                                    }
-                                />
-                            }
-                            label={
-                                feature.display_name ||
-                                feature.feature_name
-                            }
-                        />
-
-                    ))}
-
-                </FormGroup>
-
-
-                <Stack
-                    direction="row"
-                    spacing={2}
-                    sx={{ mt: 2 }}
-                >
-
-                    <Button
-                        variant="contained"
-                        disabled={saving}
-                        onClick={handleSave}
-                    >
-                        {saving
-                            ? "Сохранение..."
-                            : "Сохранить признаки"}
-                    </Button>
-
-
-                    <Button
-                        variant="outlined"
-                        disabled={saving}
-                        onClick={loadFeatures}
-                    >
-                        Обновить
-                    </Button>
-
-                </Stack>
-
-            </CardContent>
-
-        </Card>
+        </Paper>
     );
 }
