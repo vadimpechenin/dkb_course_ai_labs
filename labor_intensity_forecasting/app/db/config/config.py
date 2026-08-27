@@ -1,4 +1,4 @@
-pl = 'docker'
+pl = 'ndocker'
 #pl = 'docker'
 if (pl=='docker'):
     # Для Docker
