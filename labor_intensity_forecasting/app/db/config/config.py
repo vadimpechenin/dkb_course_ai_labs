@@ -1,4 +1,4 @@
-pl = 'nodocker'
+pl = 'docker'
 #pl = 'docker'
 if (pl=='docker'):
     # Для Docker

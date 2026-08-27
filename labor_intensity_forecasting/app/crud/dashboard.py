@@ -40,14 +40,22 @@ class DashboardCRUD:
         ).first()
 
     def get_active_model(self):
-        model = (
+        trainingRun = self.session.query(
+            TrainingRun
+        ).filter(
+            TrainingRun.is_active == True
+        ).first()
+        """model = (
             self.session.query(MLModel)
             .filter(
                 MLModel.active == True
             )
             .first()
-        )
-
+        )"""
+        if trainingRun is None:
+            return None, None
+        else:
+            model = trainingRun.model
         if model is None:
             return None, None
 

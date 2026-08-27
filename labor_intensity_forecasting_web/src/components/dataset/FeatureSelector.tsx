@@ -107,7 +107,7 @@ export default function FeatureSelector() {
 
             const result =
                 await saveFeatures({
-                    features: selected
+                    feature_names: selected
                 });
 
             if (result.success) {

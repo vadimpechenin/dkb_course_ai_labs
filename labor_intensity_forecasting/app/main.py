@@ -9,7 +9,7 @@ from app.core.settings import CORS_ORIGINS
 app = FastAPI(title="Labor intensity forecasting")
 
 #Блок добавления связи с фронтэндом
-pl_doc = 'nodocker'
+pl_doc = 'docker'
 #pl = 'docker'
 if (pl_doc=='docker'):
     origins = [

@@ -1,7 +1,7 @@
 export interface DatasetInfo {
     dataset_size: number;
     features_count?: number;
-    enabled_features_count: number;
+    enabled_features_count?: number;
     target_column?: string;
 }
 
@@ -43,11 +43,11 @@ export interface OperationsResponse {
     pages: number;
 }
 
-export interface SaveFeaturesRequest {
-    features: string[];
+export interface FeaturesSaveRequest {
+    feature_names: string[];
 }
 
-export interface SaveFeaturesResponse {
+export interface FeaturesSaveResponse {
     success: boolean;
     message?: string;
 }

@@ -4,9 +4,9 @@ import type {
     DatasetInfo,
     Feature,
     OperationsResponse,
-    SaveFeaturesRequest,
-    SaveFeaturesResponse
+    FeaturesSaveRequest, FeaturesSaveResponse
 } from "../types/Dataset";
+//import {FeaturesSaveResponse} from "../types/Dataset";
 
 
 /**
@@ -37,11 +37,11 @@ export async function getFeatures(): Promise<Feature[]> {
  * POST /dataset/features
  */
 export async function saveFeatures(
-    data: SaveFeaturesRequest
-): Promise<SaveFeaturesResponse> {
+    data: FeaturesSaveRequest
+): Promise<FeaturesSaveResponse> {
 
     const response =
-        await api.post<SaveFeaturesResponse>(
+        await api.post<FeaturesSaveResponse>(
             "/dataset/features",
             data
         );

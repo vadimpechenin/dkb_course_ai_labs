@@ -90,7 +90,7 @@ export default function DatasetInfo({
 
                         <Typography variant="h4">
 
-                            {dataset.enabled_features}
+                            {dataset.enabled_features_count}
 
                         </Typography>
 
