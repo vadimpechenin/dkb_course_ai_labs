@@ -1,0 +1,17 @@
+class NamesOfTables():
+    def __init__(self):
+        self.CuttingModesName = 'cutting_modes'
+        self.DatasetsName = 'datasets'
+        self.MLModelsName = 'ml_models'
+        self.TrainingRunsName = 'training_runs'
+        self.ModelFilesName= 'model_files'
+        self.PredictionsName = 'predictions'
+        self.ExperimentsName = 'experiments'
+        self.FeatureSettingsName = 'feature_settings'
+        self.FeatureVectorsName = 'feature_vectors'
+        self.ProcessedSamplesName = 'processed_samples'
+        self.WearBordersName = 'wear_borders'
+        self.SignalSamplesName = 'signal_samples'
+        self.ToolWearMeasurementsName = 'tool_wear_measurements'
+        self.ToolsName = 'tools'
+        self.WearBordersName = 'wear_borders'
