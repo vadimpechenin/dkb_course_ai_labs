@@ -1,0 +1,143 @@
+.dashboard {
+    padding: 24px;
+}
+
+.dashboard-header {
+    margin-bottom: 32px;
+}
+
+.dashboard-header h1 {
+    margin: 0 0 8px 0;
+}
+
+.dashboard-header p {
+    margin: 0;
+    color: #666;
+    line-height: 1.4;
+}
+
+.dashboard-section {
+    margin-bottom: 32px;
+}
+
+.dashboard-section h2 {
+    margin-bottom: 16px;
+}
+
+
+/* Statistics */
+
+.dashboard-statistics {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+}
+
+.dashboard-statistic-card {
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: white;
+}
+
+.dashboard-statistic-value {
+    font-size: 28px;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.dashboard-statistic-title {
+    color: #666;
+}
+
+
+/* Models */
+
+.dashboard-models {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+
+.dashboard-model-card {
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: white;
+}
+
+.dashboard-model-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.dashboard-model-header h3 {
+    margin: 0;
+}
+
+.dashboard-model-active {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.dashboard-model-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.dashboard-model-info div {
+    display: flex;
+    justify-content: space-between;
+}
+
+.dashboard-model-info span {
+    color: #666;
+}
+
+
+/* Training */
+
+.dashboard-training,
+.dashboard-empty {
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: white;
+}
+
+.dashboard-training-header h3 {
+    margin: 0 0 4px 0;
+}
+
+.dashboard-training-header p {
+    margin: 0;
+    color: #666;
+}
+
+.dashboard-training-info {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-top: 20px;
+}
+
+.dashboard-training-info div {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.dashboard-training-info span {
+    color: #666;
+    font-size: 14px;
+}
+
+.dashboard-training-info strong {
+    font-size: 16px;
+}
