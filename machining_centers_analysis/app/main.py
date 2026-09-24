@@ -35,6 +35,10 @@ app.add_middleware(
 # Все пути
 app.include_router(initial.router)
 app.include_router(dashboard_router)
+app.include_router(datasets_router)
+app.include_router(features_router)
+app.include_router(training_router)
+app.include_router(predictions_router)
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
