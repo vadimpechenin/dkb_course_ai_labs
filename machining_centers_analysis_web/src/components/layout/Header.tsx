@@ -10,7 +10,7 @@ export default function Header() {
                 <Box sx={{ flexGrow: 1 }} />
                 <Typography variant="h6">
 
-             Классификация износа инструмента
+            Классификация износа режущего инструмента
 
     </Typography>
                 <Box sx={{ flexGrow: 1 }} />

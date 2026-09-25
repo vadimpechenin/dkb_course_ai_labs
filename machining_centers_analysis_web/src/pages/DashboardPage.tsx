@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 
+import AppLayout from "../components/layout/AppLayout";
+
 import { getDashboard } from "../api/dashboardApi";
 import type { Dashboard } from "../types/Dashboard";
 
@@ -44,8 +46,10 @@ export default function DashboardPage() {
 
 
     return (
+        <AppLayout>
         <DashboardComponent
             dashboard={dashboard}
         />
+        </AppLayout>
     );
 }

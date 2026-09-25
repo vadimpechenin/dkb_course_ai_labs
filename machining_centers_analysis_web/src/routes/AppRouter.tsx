@@ -1,6 +1,5 @@
 import {BrowserRouter,Routes,Route, Navigate } from "react-router-dom";
 
-import Layout from "../components/layout/Layout"; 
 import DashboardPage from "../pages/DashboardPage";
 import DatasetsPage from "../pages/DatasetsPage";
 import FeaturesPage from "../pages/FeaturesPage";
@@ -14,8 +13,10 @@ export default function AppRouter(){
         <BrowserRouter>
 
             <Routes>
-				<Route element={<Layout />}  >
-					<Route path="/" element={<Navigate to="/dashboard" replace />} />
+					<Route
+						path="/"
+						element={<Navigate to="/dashboard" replace />}
+					/>
 
 					<Route
 						path="/dashboard"
@@ -41,7 +42,7 @@ export default function AppRouter(){
 						path="/predictions"
 						element={<PredictionsPage />}
 					/>
-				</Route> 
+
             </Routes>
 
         </BrowserRouter>

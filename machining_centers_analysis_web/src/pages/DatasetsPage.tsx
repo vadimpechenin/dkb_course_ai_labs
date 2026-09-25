@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 
+import AppLayout from "../components/layout/AppLayout";
+
 import {
     getDatasets,
     type Dataset,
@@ -38,8 +40,10 @@ export default function DatasetsPage() {
 
 
     return (
+        <AppLayout>
         <Datasets
             datasets={datasets}
         />
+        </AppLayout>
     );
 }

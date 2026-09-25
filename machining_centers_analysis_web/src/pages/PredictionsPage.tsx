@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 
+import AppLayout from "../components/layout/AppLayout";
+
 import {
     getPredictions,
     type Prediction,
@@ -41,8 +43,10 @@ export default function PredictionsPage() {
 
 
     return (
+        <AppLayout>
         <Predictions
             predictions={predictions}
         />
+        </AppLayout>
     );
 }

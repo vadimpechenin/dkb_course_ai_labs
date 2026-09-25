@@ -1,32 +1,49 @@
-import type { Feature } from "../../api/featuresApi";
+import { useEffect, useState } from "react";
+
+import AppLayout from "../components/layout/AppLayout";
+
+import {
+    getFeatures,
+    type Feature,
+} from "../api/featuresApi";
+
+import Features from "../components/features/Features";
 
 
-interface FeaturesProps {
-    features: Feature[];
-}
+export default function FeaturesPage() {
+
+    const [features, setFeatures] = useState<Feature[]>();
+    const [error, setError] = useState<string>();
 
 
-export default function Features({
-    features,
-}: FeaturesProps) {
+    useEffect(() => {
+
+        getFeatures()
+            .then(setFeatures)
+            .catch(() => {
+                setError(
+                    "Не удалось загрузить признаки."
+                );
+            });
+
+    }, []);
+
+
+    if (error) {
+        return <div>{error}</div>;
+    }
+
+
+    if (!features) {
+        return <div>Loading...</div>;
+    }
+
 
     return (
-        <div>
-
-            <h1>Признаки</h1>
-
-            {features.length === 0 ? (
-                <p>
-                    Признаки отсутствуют.
-                </p>
-            ) : (
-                features.map((feature) => (
-                    <div key={feature.id}>
-                        {feature.display_name}
-                    </div>
-                ))
-            )}
-
-        </div>
+        <AppLayout>
+        <Features
+            features={features}
+        />
+        </AppLayout>
     );
 }

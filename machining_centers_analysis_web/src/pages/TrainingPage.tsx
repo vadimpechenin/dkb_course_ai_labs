@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 
+import AppLayout from "../components/layout/AppLayout";
+
 import {
     getTraining,
     type TrainingPageData,
@@ -41,8 +43,10 @@ export default function TrainingPage() {
 
 
     return (
+        <AppLayout>
         <Training
             training={training}
         />
+        </AppLayout>
     );
 }
