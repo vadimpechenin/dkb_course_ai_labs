@@ -17,3 +17,13 @@ class DatasetResponse(BaseModel):
 class DatasetsResponse(BaseModel):
 
     datasets: List[DatasetResponse]
+
+class DatasetStatisticsResponse(BaseModel):
+
+    dataset_id: str
+
+    tools_count: int
+
+    experiments_count: int
+
+    samples_count: int
