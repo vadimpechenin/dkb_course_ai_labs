@@ -1,5 +1,7 @@
 from fastapi import APIRouter
-
+from app.db.core.session import SQLDataBase
+from app.services.datasets import DatasetsService
+from app.schemas.datasets import DatasetsResponse
 
 router = APIRouter(
     prefix="/datasets",
@@ -10,10 +12,22 @@ router = APIRouter(
 @router.get("")
 async def get_datasets():
 
-    """
-    Возвращает список доступных наборов данных.
+     """
+     Возвращает список доступных наборов данных.
+     """
 
-    Пока БД не используется.
-    """
+     database = SQLDataBase()
 
-    return []
+     database.create_session()
+
+     try:
+
+        service = DatasetsService(
+            database.session
+        )
+
+        return service.get_datasets()
+
+     finally:
+
+        database.session.close()

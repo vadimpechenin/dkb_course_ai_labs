@@ -1,4 +1,6 @@
-import type { Dataset } from "../../api/datasetsApi";
+import type {
+    Dataset,
+} from "../../types/Dataset";
 
 
 interface DatasetsProps {
@@ -14,17 +16,36 @@ export default function Datasets({
         <div>
 
             <h1>Наборы данных</h1>
+            <p>
+                Наборы данных для классификации
+                износа режущего инструмента.
+            </p>
 
             {datasets.length === 0 ? (
                 <p>
                     Наборы данных отсутствуют.
                 </p>
             ) : (
-                datasets.map((dataset) => (
-                    <div key={dataset.id}>
-                        {dataset.name}
-                    </div>
-                ))
+                <div>
+
+                    {datasets.map((dataset) => (
+
+                        <div key={dataset.id}>
+
+                            <h2>
+                                {dataset.name}
+                            </h2>
+
+                            <p>
+                                {dataset.description}
+                            </p>
+
+                        </div>
+
+                    ))}
+
+                </div>
+
             )}
 
         </div>

@@ -1,16 +1,16 @@
 import api from "../services/axios";
 
-export interface Dataset {
-    id: string;
-    name: string;
-}
+import type {
+    DatasetsResponse,
+} from "../types/Dataset";
 
 
-export const getDatasets = async (): Promise<Dataset[]> => {
+export const getDatasets = async (): Promise<DatasetsResponse> => {
 
-    const response = await api.get<Dataset[]>(
+    const response = await api.get<DatasetsResponse>(
         "/datasets"
     );
-
+    //console.log("Получен ответ")
+    //console.log(JSON.stringify(response.data, null, 2));
     return response.data;
 };
