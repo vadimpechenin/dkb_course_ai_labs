@@ -8,27 +8,43 @@ import type { Dataset } from "../types/Dataset";
 
 import Datasets from "../components/datasets/Datasets";
 
+import {
+    useExperiment
+} from "../context/ExperimentContext";
+
 
 export default function DatasetsPage() {
 
-    const [datasets, setDatasets] =
-        useState<Dataset[] | undefined>(undefined);
+    const [
+        datasets,
+        setDatasets
+    ] = useState<Dataset[] | undefined>(undefined);
 
-    const [error, setError] =
-        useState<string>();
 
-    const [selectedDatasetId, setSelectedDatasetId] =
-        useState<string | null>(null);
+    const [
+        error,
+        setError
+    ] = useState<string>();
+
+
+    const {
+        selectedDatasetId,
+        setSelectedDatasetId
+    } = useExperiment();
 
 
     useEffect(() => {
 
         getDatasets()
+
             .then((response) => {
 
-                setDatasets(response.datasets);
+                setDatasets(
+                    response.datasets
+                );
 
             })
+
             .catch((error) => {
 
                 console.error(error);
@@ -43,30 +59,49 @@ export default function DatasetsPage() {
 
 
     if (error) {
+
         return (
             <AppLayout>
-                <div>{error}</div>
+
+                <div>
+                    {error}
+                </div>
+
             </AppLayout>
         );
+
     }
 
 
     if (!datasets) {
+
         return (
             <AppLayout>
-                <div>Loading...</div>
+
+                <div>
+                    Loading...
+                </div>
+
             </AppLayout>
         );
+
     }
 
 
     return (
+
         <AppLayout>
 
             <Datasets
                 datasets={datasets}
-                selectedDatasetId={selectedDatasetId}
-                onSelectDataset={setSelectedDatasetId}
+
+                selectedDatasetId={
+                    selectedDatasetId
+                }
+
+                onSelectDataset={
+                    setSelectedDatasetId
+                }
             />
 
         </AppLayout>
