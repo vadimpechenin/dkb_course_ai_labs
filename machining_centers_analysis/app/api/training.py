@@ -38,7 +38,7 @@ async def start_training(
         )
 
 
-        results = service.train(
+        results = await service.train(
             request
         )
 

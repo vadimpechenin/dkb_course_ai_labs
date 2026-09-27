@@ -38,7 +38,7 @@ class TrainingService:
             ClassifierService()
         )
 
-    def train(
+    async def train(
             self,
             request
     ):
@@ -74,12 +74,12 @@ class TrainingService:
             )
 
         rows = (
-            self.crud.get_feature_vectors(
+              self.crud.get_feature_vectors(
                 request.dataset_id
             )
         )
 
-        if not rows:
+        if not rows: #not rows
             raise HTTPException(
                 status_code=400,
                 detail=(
@@ -88,11 +88,47 @@ class TrainingService:
                 )
             )
 
-        X, y, groups = (
-            self._prepare_data(
-                rows
-            )
+
+        print(
+            "TRAINING: rows count =",
+            len(rows)
         )
+
+        if rows:
+            print(
+                "TRAINING: first row type =",
+                type(rows[0])
+            )
+            print(
+                "TRAINING: first row =",
+                rows[0]
+            )
+
+        try:
+            X, y, groups = self._prepare_data(rows)
+
+            print(
+                "TRAINING: data prepared:",
+                "X =", X.shape,
+                "y =", len(y),
+                "groups =", len(groups)
+            )
+
+        except HTTPException as e:
+            print(
+                "TRAINING: HTTPException in _prepare_data:",
+                e.status_code,
+                e.detail
+            )
+            raise
+
+        except Exception as e:
+            print(
+                "TRAINING: Exception in _prepare_data:",
+                type(e).__name__,
+                str(e)
+            )
+            raise
 
         results = []
 
