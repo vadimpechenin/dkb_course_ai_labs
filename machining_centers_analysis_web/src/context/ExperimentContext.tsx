@@ -12,14 +12,14 @@ interface ExperimentContextType {
 
     selectedFeatureIds: string[];
 
-    selectedModelId: string | null;
+    selectedModelIds: string[];
 
 
     setSelectedDatasetId: (datasetId: string | null) => void;
 
     setSelectedFeatureIds: (featureIds: string[]) => void;
 
-    setSelectedModelId: (modelId: string | null) => void;
+    setSelectedModelIds: (modelIds: string[]) => void;
 
 
     clearExperiment: () => void;
@@ -58,7 +58,7 @@ export function ExperimentProvider({
     // сбрасываем параметры эксперимента.
     setSelectedFeatureIds([]);
 
-    setSelectedModelId(null);
+    setSelectedModelIds([]);
 };
 
     const [
@@ -68,8 +68,8 @@ export function ExperimentProvider({
 
 
     const [
-        selectedModelId,
-        setSelectedModelId
+        selectedModelIds,
+        setSelectedModelIds
     ] = useState<string | null>(null);
 
 
@@ -77,7 +77,7 @@ export function ExperimentProvider({
 
         setSelectedDatasetId(null);
         setSelectedFeatureIds([]);
-        setSelectedModelId(null);
+        setSelectedModelIds([]);
 
     };
 
@@ -87,11 +87,11 @@ export function ExperimentProvider({
             value={{
                 selectedDatasetId,
                 selectedFeatureIds,
-                selectedModelId,
+                selectedModelIds,
 
                 setSelectedDatasetId,
                 setSelectedFeatureIds,
-                setSelectedModelId,
+                setSelectedModelIds,
 
                 clearExperiment
             }}

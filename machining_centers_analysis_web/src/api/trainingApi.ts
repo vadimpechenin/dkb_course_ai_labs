@@ -1,18 +1,45 @@
 import api from "../services/axios";
 
 
-export interface TrainingPageData {
-    datasets: unknown[];
-    features: unknown[];
-    models: unknown[];
-}
+import type {
+    TrainingRequest,
+    TrainingRun,
+    TrainingResponse
+} from "../types/Training";
+
+export const startTraining = async (
+    request: TrainingRequest
+) => {
+
+    const response =
+        await api.post<TrainingResponse>(
+            "/training",
+            request
+        );
+
+    return response.data;
+};
 
 
-export const getTraining = async (): Promise<TrainingPageData> => {
+export const getTrainingRuns = async () => {
 
-    const response = await api.get<TrainingPageData>(
-        "/training"
-    );
+    const response =
+        await api.get<TrainingResponse>(
+            "/training"
+        );
+
+    return response.data.training_runs;
+};
+
+
+export const getTrainingRun = async (
+    id: string
+) => {
+
+    const response =
+        await api.get<TrainingRun>(
+            `/training/${id}`
+        );
 
     return response.data;
 };
