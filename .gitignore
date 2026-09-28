@@ -7,3 +7,4 @@ weights
 labor_intensity_forecasting/weights/*
 labor_intensity_forecasting/catboost_info
 !labor_intensity_forecasting/weights/annotation
+machining_centers_analysis/models/*
