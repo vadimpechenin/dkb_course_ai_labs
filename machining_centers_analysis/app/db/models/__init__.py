@@ -12,6 +12,7 @@ from .processed_samples import ProcessedSample
 from .signal_samples import SignalSample
 from .tool_wear_measurements import ToolWearMeasurement
 from .tools import Tool
+from .tools_catalog import ToolCatalog
 from .wear_border import WearBorder
 
 
@@ -30,6 +31,7 @@ __all__ = [
     "SignalSample",
     "ToolWearMeasurement",
     "Tool",
+    "ToolCatalog",
     "WearBorder"
 
 ]

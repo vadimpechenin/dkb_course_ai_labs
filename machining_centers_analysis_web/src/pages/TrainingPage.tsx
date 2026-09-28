@@ -11,9 +11,12 @@ import {
 } from "../api/modelsApi";
 
 import {
-    startTraining,
-    type TrainingRun
+    startTraining
 } from "../api/trainingApi";
+
+import type {
+    TrainingRun
+} from "../types/Training";
 
 import type {
     MLModel
@@ -21,6 +24,9 @@ import type {
 
 import TrainingModels
     from "../components/training/TrainingModels";
+
+import TrainingResults
+    from "../components/training/TrainingResults";
 
 import {
     useExperiment

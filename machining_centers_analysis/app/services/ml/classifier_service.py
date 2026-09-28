@@ -109,7 +109,8 @@ class ClassifierService:
                 groups=groups
             )
         )
-
+        #Преобразование строк в числа
+        y = y.astype(int)
 
         X_train = X[train_indices]
         X_test = X[test_indices]

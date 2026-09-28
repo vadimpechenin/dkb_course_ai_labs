@@ -16,7 +16,8 @@ export const startTraining = async (
             "/training",
             request
         );
-
+    console.log("Получен ответ")
+    console.log(JSON.stringify(response.data, null, 2));
     return response.data;
 };
 

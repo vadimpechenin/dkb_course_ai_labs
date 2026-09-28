@@ -93,7 +93,7 @@ class TrainingService:
             "TRAINING: rows count =",
             len(rows)
         )
-
+        """
         if rows:
             print(
                 "TRAINING: first row type =",
@@ -105,8 +105,9 @@ class TrainingService:
             )
 
         try:
-            X, y, groups = self._prepare_data(rows)
-
+        """
+        X, y, groups = self._prepare_data(rows)
+        """
             print(
                 "TRAINING: data prepared:",
                 "X =", X.shape,
@@ -129,7 +130,7 @@ class TrainingService:
                 str(e)
             )
             raise
-
+        """
         results = []
 
         for model in models:
@@ -159,7 +160,7 @@ class TrainingService:
         y = []
 
         groups = []
-
+        sample_ = []
         for vector, sample in rows:
 
             features = vector.features
@@ -200,7 +201,10 @@ class TrainingService:
             y.append(
                 vector.target_class
             )
-
+            #print('Экземпляр:' + sample.id)
+            #print('Эксперимент:' + sample.tool_id)
+            #print('Инструмент:' + sample.tool_id)
+            sample_.append(sample.id)
             groups.append(
                 sample.tool_id
             )
@@ -267,7 +271,6 @@ class TrainingService:
                     scaler=request.scaler
                 )
             )
-
 
         except Exception as exc:
 
