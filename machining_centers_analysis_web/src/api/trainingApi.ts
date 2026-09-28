@@ -4,7 +4,8 @@ import api from "../services/axios";
 import type {
     TrainingRequest,
     TrainingRun,
-    TrainingResponse
+    TrainingResponse,
+    TrainingRunDetail
 } from "../types/Training";
 
 export const startTraining = async (
@@ -33,14 +34,16 @@ export const getTrainingRuns = async () => {
 };
 
 
-export const getTrainingRun = async (
-    id: string
-) => {
+export async function getTrainingRun(
+    trainingRunId: string
+): Promise<TrainingRunDetail> {
 
-    const response =
-        await api.get<TrainingRun>(
-            `/training/${id}`
-        );
-
+    const response = await api.get<TrainingRunDetail>(
+        `/training/${trainingRunId}`
+    );
+ console.log(
+    "TRAINING RUN RESPONSE:",
+    response.data
+);
     return response.data;
-};
+}

@@ -1,52 +1,91 @@
 import { useEffect, useState } from "react";
 
-import AppLayout from "../components/layout/AppLayout";
-
 import {
-    getPredictions,
-    type Prediction,
-} from "../api/predictionsApi";
+    getTrainingRun
+} from "../api/trainingApi";
+import type TrainingRunDetail from "../types/Training";
+import TrainingRunInfo
+    from "../components/predictions/TrainingRunInfo";
 
-import Predictions from "../components/predictions/Predictions";
 
+export default function PredictionPage() {
 
-export default function PredictionsPage() {
+    const trainingRunId = "2a2f2a8aa86e4e2c805323904218d534";
 
-    const [predictions, setPredictions] =
-        useState<Prediction[]>();
+    const [
+        trainingRun,
+        setTrainingRun
+    ] = useState<TrainingRunDetail | null>(null);
+
+    const [loading, setLoading] =
+        useState(false);
 
     const [error, setError] =
-        useState<string>();
+        useState<string | null>(null);
 
 
     useEffect(() => {
 
-        getPredictions()
-            .then(setPredictions)
-            .catch(() => {
-                setError(
-                    "Не удалось загрузить результаты классификации."
+        async function loadTrainingRun() {
+
+            setLoading(true);
+            setError(null);
+
+            try {
+
+                const data =
+                    await getTrainingRun(
+                        trainingRunId
+                    );
+
+                setTrainingRun(data);
+
+            } catch (error) {
+
+                console.error(
+                    "Ошибка загрузки TrainingRun:",
+                    error
                 );
-            });
 
-    }, []);
+                setError(
+                    "Не удалось загрузить TrainingRun"
+                );
 
+            } finally {
+
+                setLoading(false);
+            }
+        }
+
+        loadTrainingRun();
+
+    }, [trainingRunId]);
+
+
+    if (loading) {
+        return <div>Загрузка модели...</div>;
+    }
 
     if (error) {
         return <div>{error}</div>;
     }
 
-
-    if (!predictions) {
-        return <div>Loading...</div>;
+    if (!trainingRun) {
+        return (
+            <div>
+                TrainingRun не найден
+            </div>
+        );
     }
 
 
     return (
-        <AppLayout>
-        <Predictions
-            predictions={predictions}
-        />
-        </AppLayout>
+        <div>
+            <h1>Prediction</h1>
+
+            <TrainingRunInfo
+                trainingRun={trainingRun}
+            />
+        </div>
     );
 }
