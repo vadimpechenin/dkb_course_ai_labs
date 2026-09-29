@@ -82,7 +82,7 @@ async def get_training_runs():
 
 @router.get(
     "/{training_run_id}",
-    response_model=TrainingRunResponse
+    response_model=TrainingRunDetailResponse
 )
 async def get_training_run(
     training_run_id: str

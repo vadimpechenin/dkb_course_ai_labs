@@ -25,8 +25,8 @@ function formatTime(
 }
 
 export default function TrainingRunInfo({
-    trainingRun
-}: TrainingRunInfoProps) {
+                                            trainingRun
+                                        }: TrainingRunInfoProps) {
 
     return (
         <div>
@@ -58,18 +58,21 @@ export default function TrainingRunInfo({
 
             <h3>Качество на тесте</h3>
 
-            <table>
-                <thead>
+            {/* Добавлена обертка для центрирования таблицы по горизонтали */}
+            <div style={{ display: "flex", justifyContent: "center", width: "100%", margin: "20px 0" }}>
+                <table style={{ borderCollapse: "collapse", minWidth: "300px" }}>
+                    <thead>
                     <tr>
-                        <th>Метрика</th>
-                        <th>Значение</th>
+                        {/* Добавлено выравнивание текста внутри ячеек */}
+                        <th style={{ textAlign: "left", padding: "8px 16px", borderBottom: "2px solid #ddd" }}>Метрика</th>
+                        <th style={{ textAlign: "right", padding: "8px 16px", borderBottom: "2px solid #ddd" }}>Значение</th>
                     </tr>
-                </thead>
+                    </thead>
 
-                <tbody>
+                    <tbody>
                     <tr>
-                        <td>Accuracy</td>
-                        <td>
+                        <td style={{ padding: "8px 16px", borderBottom: "1px solid #eee" }}>Accuracy</td>
+                        <td style={{ textAlign: "right", padding: "8px 16px", borderBottom: "1px solid #eee" }}>
                             {formatPercent(
                                 trainingRun.accuracy
                             )}
@@ -77,8 +80,8 @@ export default function TrainingRunInfo({
                     </tr>
 
                     <tr>
-                        <td>Precision</td>
-                        <td>
+                        <td style={{ padding: "8px 16px", borderBottom: "1px solid #eee" }}>Precision</td>
+                        <td style={{ textAlign: "right", padding: "8px 16px", borderBottom: "1px solid #eee" }}>
                             {formatPercent(
                                 trainingRun.precision_weighted
                             )}
@@ -86,8 +89,8 @@ export default function TrainingRunInfo({
                     </tr>
 
                     <tr>
-                        <td>Recall</td>
-                        <td>
+                        <td style={{ padding: "8px 16px", borderBottom: "1px solid #eee" }}>Recall</td>
+                        <td style={{ textAlign: "right", padding: "8px 16px", borderBottom: "1px solid #eee" }}>
                             {formatPercent(
                                 trainingRun.recall_weighted
                             )}
@@ -95,8 +98,8 @@ export default function TrainingRunInfo({
                     </tr>
 
                     <tr>
-                        <td>F1</td>
-                        <td>
+                        <td style={{ padding: "8px 16px", borderBottom: "1px solid #eee" }}>F1</td>
+                        <td style={{ textAlign: "right", padding: "8px 16px", borderBottom: "1px solid #eee" }}>
                             {formatPercent(
                                 trainingRun.f1_weighted
                             )}
@@ -104,8 +107,8 @@ export default function TrainingRunInfo({
                     </tr>
 
                     <tr>
-                        <td>CV score</td>
-                        <td>
+                        <td style={{ padding: "8px 16px", borderBottom: "1px solid #eee" }}>CV score</td>
+                        <td style={{ textAlign: "right", padding: "8px 16px", borderBottom: "1px solid #eee" }}>
                             {formatPercent(
                                 trainingRun.cv_score
                             )}
@@ -113,15 +116,16 @@ export default function TrainingRunInfo({
                     </tr>
 
                     <tr>
-                        <td>Время обучения</td>
-                        <td>
+                        <td style={{ padding: "8px 16px", borderBottom: "1px solid #eee" }}>Время обучения</td>
+                        <td style={{ textAlign: "right", padding: "8px 16px", borderBottom: "1px solid #eee" }}>
                             {formatTime(
                                 trainingRun.training_time
                             )}
                         </td>
                     </tr>
-                </tbody>
-            </table>
+                    </tbody>
+                </table>
+            </div>
 
             <h3>Конфигурация обучения</h3>
 
