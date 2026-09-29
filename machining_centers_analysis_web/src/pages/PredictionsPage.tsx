@@ -3,14 +3,14 @@ import { useEffect, useState } from "react";
 import {
     getTrainingRun
 } from "../api/trainingApi";
-import type TrainingRunDetail from "../types/Training";
+import type {TrainingRunDetail} from "../types/Training";
 import TrainingRunInfo
     from "../components/predictions/TrainingRunInfo";
 
 
 export default function PredictionPage() {
 
-    const trainingRunId = "2a2f2a8aa86e4e2c805323904218d534";
+    const trainingRunId = "3b796ba159a546cb8899a92e6a9ba30c";
 
     const [
         trainingRun,

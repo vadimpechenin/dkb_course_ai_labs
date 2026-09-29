@@ -6,6 +6,16 @@ class Prediction(Base):
 
     id = Column(String(50), primary_key=True, autoincrement=False)
 
+    batch_id = Column(
+        String(50),
+        ForeignKey(
+            "prediction_batches.id",
+            ondelete="CASCADE"
+        ),
+        nullable=False
+    )
+
+
     training_run_id = Column(
         String(50),
         ForeignKey("training_runs.id"),

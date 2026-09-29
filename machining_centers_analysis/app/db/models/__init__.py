@@ -2,6 +2,7 @@ from .feature_setting import FeatureSetting
 from .ml_model import MLModel
 from .model_file import ModelFile
 from .cutting_modes import CuttingMode
+from .prediction_batch import PredictionBatch
 from .prediction import Prediction
 from .datasets import Dataset
 from .training_run import TrainingRun
@@ -21,6 +22,7 @@ __all__ = [
     "MLModel",
     "ModelFile",
     "CuttingMode",
+    "PredictionBatch",
     "Prediction",
     "Dataset",
     "TrainingRun",

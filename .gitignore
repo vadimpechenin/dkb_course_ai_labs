@@ -8,3 +8,4 @@ labor_intensity_forecasting/weights/*
 labor_intensity_forecasting/catboost_info
 !labor_intensity_forecasting/weights/annotation
 machining_centers_analysis/models/*
+!machining_centers_analysis\models\3b796ba159a546cb8899a92e6a9ba30c
