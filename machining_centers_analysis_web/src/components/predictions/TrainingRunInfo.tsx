@@ -1,4 +1,4 @@
-import type { TrainingRunDetail } from "../../api/training";
+import type { TrainingRunDetail } from "../../types/Training";
 
 interface TrainingRunInfoProps {
     trainingRun: TrainingRunDetail;

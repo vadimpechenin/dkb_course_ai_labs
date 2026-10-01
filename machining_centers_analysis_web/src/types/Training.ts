@@ -89,3 +89,26 @@ export interface ModelFileInfo {
 
     created_at?: string | null;
 }
+
+export interface TrainingRunListItem {
+    id: string;
+    model_id: string;
+    model_name?: string | null;
+    dataset_id: string;
+    dataset_name?: string | null;
+    dataset_size: number;
+
+    accuracy?: number | null;
+    precision_weighted?: number | null;
+    recall_weighted?: number | null;
+    f1_weighted?: number | null;
+
+    training_time?: number | null;
+    created_at?: string | null;
+}
+
+export interface TrainingRunSelectorProps {
+    trainingRuns: TrainingRunListItem[];
+    selectedIds: string[];
+    onChange: (ids: string[]) => void;
+}

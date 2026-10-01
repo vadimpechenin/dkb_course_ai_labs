@@ -1,17 +1,33 @@
 import api from "../services/axios";
 
 
-export interface Prediction {
-    id: string;
-    predicted_class: number;
-}
+import type {
+    PredictionBatch,
+    PredictionRequest
+} from "../types/Prediction";
+import type {TrainingResponse, TrainingRunDetail} from "../types/Training.ts";
 
 
-export const getPredictions = async (): Promise<Prediction[]> => {
+export async function createPredictions(
+    request: PredictionRequest
+): Promise<PredictionBatch> {
 
-    const response = await api.get<Prediction[]>(
-        "/predictions"
+    const response = await api.post<PredictionBatch>(
+        "/predictions",
+        request
     );
 
     return response.data;
-};
+}
+
+
+export async function getPredictions(
+    predictionId: string
+): Promise<PredictionBatch> {
+
+    const response = await api.get<PredictionBatch>(
+        `/predictions/${predictionId}`
+    );
+
+    return response.data;
+}

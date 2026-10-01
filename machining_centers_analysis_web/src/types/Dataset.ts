@@ -12,3 +12,15 @@ export interface Dataset {
 export interface DatasetsResponse {
     datasets: Dataset[];
 }
+
+export interface Sample {
+    id: string;
+    sample_number?: number | null;
+    tool_id: string;
+}
+
+export interface SampleSelectorProps {
+    samples: Sample[];
+    selectedIds: string[];
+    onChange: (ids: string[]) => void;
+}
