@@ -23,12 +23,7 @@ export async function getSamples(
     const response = await api.get<Sample[]>(
         `/datasets/${datasetId}/samples`
     );
-
-    if (!response.ok) {
-        throw new Error(
-            "Не удалось загрузить образцы"
-        );
-    }
+    
 
     return response.data;
 }

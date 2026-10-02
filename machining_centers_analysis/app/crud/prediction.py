@@ -13,6 +13,7 @@ class PredictionCRUD:
 
     def create_batch(self, batch):
         self.session.add(batch)
+        self.session.flush()
 
     def create_prediction(self, prediction):
         self.session.add(prediction)
@@ -36,11 +37,13 @@ class PredictionCRUD:
             )
             .join(
                 TrainingRun,
-                Prediction.training_run_id == TrainingRun.id
+                Prediction.training_run_id
+                == TrainingRun.id
             )
             .join(
                 MLModel,
-                TrainingRun.model_id == MLModel.id
+                TrainingRun.model_id
+                == MLModel.id
             )
             .where(
                 Prediction.batch_id == batch_id
@@ -48,10 +51,12 @@ class PredictionCRUD:
             .order_by(
                 Prediction.created_at,
                 Prediction.training_run_id,
-                Prediction.sample_id
+                Prediction.input_sample_id
             )
         )
 
-        result = self.session.execute(statement)
+        result = self.session.execute(
+            statement
+        )
 
         return result.all()

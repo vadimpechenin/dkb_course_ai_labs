@@ -15,7 +15,6 @@ class Prediction(Base):
         nullable=False
     )
 
-
     training_run_id = Column(
         String(50),
         ForeignKey("training_runs.id"),
@@ -28,10 +27,33 @@ class Prediction(Base):
         back_populates="predictions"
     )
 
+    # Если Prediction основан на существующем
+    # SignalSample, здесь может быть его ID.
+    # Для JSON Prediction = NULL.
     sample_id = Column(
         String(50),
-        ForeignKey("signal_samples.id", ondelete="RESTRICT"),
+        ForeignKey(
+            "signal_samples.id",
+            ondelete="RESTRICT"
+        ),
+        nullable=True
+    )
+
+    # ID образца из входного JSON.
+    input_sample_id = Column(
+        String(100),
         nullable=False
+    )
+
+    # Фактический износ из JSON.
+    actual_wear = Column(
+        Float
+    )
+
+    # Эталонный класс 0 / 1 / 2,
+    # вычисленный через WearBorder.
+    actual_class = Column(
+        String(50)
     )
 
     predicted_class = Column(String(50))

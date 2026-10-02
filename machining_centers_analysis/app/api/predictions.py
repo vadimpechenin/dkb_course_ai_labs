@@ -1,16 +1,27 @@
-from fastapi import APIRouter, HTTPException, UploadFile
+import json
+
+from fastapi import (
+    APIRouter,
+    HTTPException,
+    UploadFile,
+    File,
+    Form
+)
 
 from app.db.core.session import SQLDataBase
+
 from app.schemas.prediction import (
-    PredictionRequest,
     PredictionBatchResponse,
     PredictionItemResponse
 )
+
 from app.services.prediction import (
     PredictionService
 )
-from app.crud.prediction import PredictionCRUD
 
+from app.crud.prediction import (
+    PredictionCRUD
+)
 
 
 router = APIRouter(
@@ -23,38 +34,116 @@ router = APIRouter(
     "",
     response_model=PredictionBatchResponse
 )
-def create_predictions(
-    request: PredictionRequest
+async def create_predictions(
+    training_run_ids: list[str] = Form(...),
+    file: UploadFile = File(...)
 ):
+
     database = SQLDataBase()
     database.create_session()
 
     try:
+
+        if not training_run_ids:
+
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    "Не выбрана ни одна "
+                    "TrainingRun"
+                )
+            )
+
+        if not file.filename:
+
+            raise HTTPException(
+                status_code=400,
+                detail="JSON-файл не выбран"
+            )
+
+        if not file.filename.lower().endswith(
+                ".json"
+        ):
+
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    "Необходимо загрузить "
+                    "JSON-файл"
+                )
+            )
+
+        raw = await file.read()
+
+        if not raw:
+
+            raise HTTPException(
+                status_code=400,
+                detail="JSON-файл пуст"
+            )
+
+        try:
+
+            data = json.loads(
+                raw.decode("utf-8")
+            )
+
+        except (
+            UnicodeDecodeError,
+            json.JSONDecodeError
+        ):
+
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    "Не удалось прочитать "
+                    "JSON-файл"
+                )
+            )
+
         service = PredictionService(
             database.session
         )
 
-        result = service.predict(
-            training_run_ids=request.training_run_ids,
-            sample_ids=request.sample_ids
+        result = service.predict_json(
+            training_run_ids=(
+                training_run_ids
+            ),
+            data=data
         )
 
         return PredictionBatchResponse(
+
             id=result["id"],
-            created_at=result["created_at"],
-            training_run_ids=result[
-                "training_run_ids"
-            ],
-            sample_ids=result[
-                "sample_ids"
-            ],
+
+            created_at=(
+                result["created_at"]
+            ),
+
+            training_run_ids=(
+                result[
+                    "training_run_ids"
+                ]
+            ),
+
+            sample_ids=(
+                result[
+                    "sample_ids"
+                ]
+            ),
+
             predictions=[
                 PredictionItemResponse(
                     **item
                 )
-                for item in result["predictions"]
+                for item
+                in result["predictions"]
             ]
         )
+
+    except HTTPException:
+        database.session.rollback()
+        raise
 
     except ValueError as exc:
 
@@ -65,16 +154,25 @@ def create_predictions(
             detail=str(exc)
         )
 
-    except Exception:
+    except Exception as exc:
 
         database.session.rollback()
 
+        print(
+            "PREDICTION ERROR:",
+            type(exc).__name__,
+            str(exc)
+        )
+
         raise HTTPException(
             status_code=500,
-            detail="Ошибка выполнения Prediction"
+            detail=(
+                "Ошибка выполнения Prediction"
+            )
         )
 
     finally:
+
         database.session.close()
 
 
@@ -121,35 +219,51 @@ def get_predictions(
         for prediction, training_run, ml_model in rows:
 
             if (
-                prediction.training_run_id
-                not in training_run_ids
+                    prediction.training_run_id
+                    not in training_run_ids
             ):
                 training_run_ids.append(
                     prediction.training_run_id
                 )
 
             if (
-                prediction.sample_id
-                not in sample_ids
+                    prediction.input_sample_id
+                    not in sample_ids
             ):
                 sample_ids.append(
-                    prediction.sample_id
+                    prediction.input_sample_id
                 )
 
             predictions.append(
                 PredictionItemResponse(
                     id=prediction.id,
+
                     training_run_id=(
                         prediction.training_run_id
                     ),
+
                     model_name=ml_model.name,
-                    sample_id=prediction.sample_id,
+
+                    sample_id=(
+                        prediction.input_sample_id
+                    ),
+
+                    actual_wear=(
+                        prediction.actual_wear
+                    ),
+
+                    actual_class=(
+                        prediction.actual_class
+                    ),
+
                     predicted_class=(
                         prediction.predicted_class
                     ),
+
                     confidence=(
                         prediction.confidence
                     ),
+
                     probabilities=(
                         prediction.probabilities
                     )

@@ -1,12 +1,28 @@
 import type {
-    PredictionTableProps,
-    ModelRow
+    PredictionItem
 } from "../../types/Prediction";
+
+
+interface PredictionTableProps {
+
+    predictions: PredictionItem[];
+
+    sampleIds: string[];
+}
+
+
+interface ModelInfo {
+
+    trainingRunId: string;
+
+    modelName: string;
+}
 
 
 function formatConfidence(
     value: number | null | undefined
 ): string {
+
     if (
         value === null ||
         value === undefined
@@ -20,142 +36,379 @@ function formatConfidence(
 }
 
 
+function formatWear(
+    value: number | null | undefined
+): string {
+
+    if (
+        value === null ||
+        value === undefined
+    ) {
+        return "—";
+    }
+
+    return value.toFixed(4);
+}
+
+
 export default function PredictionTable({
     predictions,
     sampleIds
 }: PredictionTableProps) {
 
-    const models = new Map<
-        string,
-        ModelRow
-    >();
 
-    for (const prediction of predictions) {
+    /*
+     * Список моделей.
+     */
+    const models =
+        new Map<
+            string,
+            ModelInfo
+        >();
 
-        let row = models.get(
-            prediction.training_run_id
-        );
 
-        if (!row) {
-            row = {
-                trainingRunId:
-                    prediction.training_run_id,
+    /*
+     * predictionMap:
+     *
+     * sample_id
+     *      ↓
+     * training_run_id
+     *      ↓
+     * PredictionItem
+     */
+    const predictionMap =
+        new Map<
+            string,
+            Map<
+                string,
+                PredictionItem
+            >
+        >();
 
-                modelName:
-                    prediction.model_name ??
-                    prediction.training_run_id,
 
-                predictions: {}
-            };
+    for (
+        const prediction
+        of predictions
+    ) {
+
+
+        /*
+         * Добавляем модель.
+         */
+        if (
+            !models.has(
+                prediction.training_run_id
+            )
+        ) {
 
             models.set(
                 prediction.training_run_id,
-                row
+                {
+                    trainingRunId:
+                        prediction.training_run_id,
+
+                    modelName:
+                        prediction.model_name
+                        ??
+                        prediction.training_run_id
+                }
             );
         }
 
-        row.predictions[
-            prediction.sample_id
-        ] = prediction;
+
+        /*
+         * Добавляем Prediction
+         * в соответствующий sample.
+         */
+        if (
+            !predictionMap.has(
+                prediction.sample_id
+            )
+        ) {
+
+            predictionMap.set(
+                prediction.sample_id,
+                new Map()
+            );
+        }
+
+
+        predictionMap
+            .get(
+                prediction.sample_id
+            )!
+            .set(
+                prediction.training_run_id,
+                prediction
+            );
     }
 
-    const rows = Array.from(
-        models.values()
-    );
 
-    if (rows.length === 0) {
+    const modelList =
+        Array.from(
+            models.values()
+        );
+
+
+    if (
+        sampleIds.length === 0 ||
+        modelList.length === 0
+    ) {
+
         return (
             <div>
-                Нет результатов Prediction
+                Нет результатов Prediction.
             </div>
         );
     }
 
+
     return (
-        <div style={{ overflowX: "auto" }}>
 
-            <h2>Результаты предсказания</h2>
+        <div
+            style={{
+                overflowX: "auto"
+            }}
+        >
 
-            <table>
+            <h2>
+                Результаты Prediction
+            </h2>
+
+
+            <table
+                style={{
+                    borderCollapse: "collapse",
+                    width: "100%"
+                }}
+            >
+
                 <thead>
-                    <tr>
-                        <th>Модель</th>
 
-                        {sampleIds.map(
-                            sampleId => (
+                    <tr>
+
+                        <th
+                            style={{
+                                padding: "8px",
+                                textAlign: "left"
+                            }}
+                        >
+                            Образец
+                        </th>
+
+
+                        <th
+                            style={{
+                                padding: "8px",
+                                textAlign: "left"
+                            }}
+                        >
+                            Фактический износ
+                        </th>
+
+
+                        <th
+                            style={{
+                                padding: "8px",
+                                textAlign: "left"
+                            }}
+                        >
+                            Факт. класс
+                        </th>
+
+
+                        {modelList.map(
+                            model => (
+
                                 <th
-                                    key={sampleId}
+                                    key={
+                                        model.trainingRunId
+                                    }
+                                    style={{
+                                        padding: "8px",
+                                        textAlign: "left"
+                                    }}
                                 >
-                                    {sampleId}
+                                    {
+                                        model.modelName
+                                    }
                                 </th>
+
                             )
                         )}
+
                     </tr>
+
                 </thead>
+
 
                 <tbody>
 
-                    {rows.map(row => (
-                        <tr
-                            key={
-                                row.trainingRunId
-                            }
-                        >
+                    {sampleIds.map(
+                        sampleId => {
 
-                            <td>
-                                <strong>
-                                    {row.modelName}
-                                </strong>
-                            </td>
+                            const row =
+                                predictionMap.get(
+                                    sampleId
+                                );
 
-                            {sampleIds.map(
-                                sampleId => {
 
-                                    const prediction =
-                                        row.predictions[
-                                            sampleId
-                                        ];
+                            /*
+                             * Берём первый Prediction
+                             * только для actual_wear /
+                             * actual_class.
+                             *
+                             * Они одинаковы для всех
+                             * моделей одного sample.
+                             */
+                            const firstPrediction =
+                                row
+                                    ? Array.from(
+                                        row.values()
+                                    )[0]
+                                    : undefined;
 
-                                    if (!prediction) {
-                                        return (
-                                            <td
-                                                key={
-                                                    sampleId
-                                                }
-                                            >
-                                                —
-                                            </td>
-                                        );
+
+                            return (
+
+                                <tr
+                                    key={
+                                        sampleId
                                     }
+                                >
 
-                                    return (
-                                        <td
-                                            key={
+                                    <td
+                                        style={{
+                                            padding: "8px"
+                                        }}
+                                    >
+                                        <strong>
+                                            {
                                                 sampleId
                                             }
-                                        >
-                                            <div>
-                                                <strong>
-                                                    {
-                                                        prediction.predicted_class
+                                        </strong>
+                                    </td>
+
+
+                                    <td
+                                        style={{
+                                            padding: "8px"
+                                        }}
+                                    >
+                                        {
+                                            formatWear(
+                                                firstPrediction
+                                                    ?.actual_wear
+                                            )
+                                        }
+                                    </td>
+
+
+                                    <td
+                                        style={{
+                                            padding: "8px"
+                                        }}
+                                    >
+                                        {
+                                            firstPrediction
+                                                ?.actual_class
+                                                ?? "—"
+                                        }
+                                    </td>
+
+
+                                    {modelList.map(
+                                        model => {
+
+                                            const item =
+                                                row?.get(
+                                                    model.trainingRunId
+                                                );
+
+
+                                            if (!item) {
+
+                                                return (
+
+                                                    <td
+                                                        key={
+                                                            model.trainingRunId
+                                                        }
+                                                        style={{
+                                                            padding: "8px"
+                                                        }}
+                                                    >
+                                                        —
+                                                    </td>
+
+                                                );
+                                            }
+
+
+                                            return (
+
+                                                <td
+                                                    key={
+                                                        model.trainingRunId
                                                     }
-                                                </strong>
-                                            </div>
+                                                    style={{
+                                                        padding: "8px"
+                                                    }}
+                                                >
 
-                                            <small>
-                                                {formatConfidence(
-                                                    prediction.confidence
-                                                )}
-                                            </small>
-                                        </td>
-                                    );
-                                }
-                            )}
+                                                    <div>
 
-                        </tr>
-                    ))}
+                                                        <strong>
+                                                            Класс:{" "}
+                                                            {
+                                                                item.predicted_class
+                                                                ?? "—"
+                                                            }
+                                                        </strong>
+
+                                                    </div>
+
+
+                                                    <div>
+
+                                                        Уверенность:{" "}
+
+                                                        {
+                                                            formatConfidence(
+                                                                item.confidence
+                                                            )
+                                                        }
+
+                                                    </div>
+
+
+                                                    {item.predicted_class !==
+                                                        item.actual_class && (
+
+                                                        <div
+                                                            style={{
+                                                                marginTop: "4px"
+                                                            }}
+                                                        >
+                                                            ⚠ Ошибка
+                                                        </div>
+
+                                                    )}
+
+                                                </td>
+
+                                            );
+                                        }
+                                    )}
+
+                                </tr>
+
+                            );
+                        }
+                    )}
 
                 </tbody>
+
             </table>
 
         </div>

@@ -1,18 +1,16 @@
-import { useEffect, useMemo, useState } from "react";
+import {
+    useEffect,
+    useMemo,
+    useState
+} from "react";
+
+import AppLayout
+    from "../components/layout/AppLayout";
 
 import {
-    getTrainingRun,
     getTrainingRuns
 } from "../api/trainingApi";
-import type {TrainingRunDetail, TrainingRunListItem} from "../types/Training";
-import TrainingRunInfo
-    from "../components/predictions/TrainingRunInfo";
-
-import {
-    getSamples,
-} from "../api/datasetsApi";
-import type {Sample} from "../types/Dataset";
-
+import type {TrainingRunListItem} from "../types/Training"
 import {
     createPredictions
 } from "../api/predictionsApi";
@@ -22,21 +20,10 @@ import type {
 } from "../types/Prediction";
 
 import TrainingRunSelector from "../components/predictions/TrainingRunSelector";
-import SampleSelector from "../components/predictions/SampleSelector";
 import PredictionTable from "../components/predictions/PredictionTable";
 
+
 export default function PredictionPage() {
-
-    const trainingRunId = "3b796ba159a546cb8899a92e6a9ba30c";
-
-    const [
-        trainingRun,
-        setTrainingRun
-    ] = useState<TrainingRunDetail | null>(null);
-
-        // --------------------------------------------
-    // TrainingRuns
-    // --------------------------------------------
 
     const [
         trainingRuns,
@@ -48,25 +35,10 @@ export default function PredictionPage() {
         setSelectedTrainingRunIds
     ] = useState<string[]>([]);
 
-
-    // --------------------------------------------
-    // Samples
-    // --------------------------------------------
-
     const [
-        samples,
-        setSamples
-    ] = useState<Sample[]>([]);
-
-    const [
-        selectedSampleIds,
-        setSelectedSampleIds
-    ] = useState<string[]>([]);
-
-
-    // --------------------------------------------
-    // Prediction result
-    // --------------------------------------------
+        selectedFile,
+        setSelectedFile
+    ] = useState<File | null>(null);
 
     const [
         prediction,
@@ -75,24 +47,9 @@ export default function PredictionPage() {
         null
     );
 
-    const [loading, setLoading] =
-        useState(false);
-
-    const [error, setError] =
-        useState<string | null>(null);
-
-      // --------------------------------------------
-    // State
-    // --------------------------------------------
-
     const [
         loadingTrainingRuns,
         setLoadingTrainingRuns
-    ] = useState(false);
-
-    const [
-        loadingSamples,
-        setLoadingSamples
     ] = useState(false);
 
     const [
@@ -100,11 +57,15 @@ export default function PredictionPage() {
         setPredicting
     ] = useState(false);
 
+    const [
+        error,
+        setError
+    ] = useState<string | null>(null);
 
-     // --------------------------------------------
-    // Load TrainingRuns
-    // --------------------------------------------
 
+    /*
+     * Загрузка списка обученных моделей.
+     */
     useEffect(() => {
 
         async function loadTrainingRuns() {
@@ -114,10 +75,10 @@ export default function PredictionPage() {
 
             try {
 
-                const data =
+                const runs =
                     await getTrainingRuns();
 
-                setTrainingRuns(data);
+                setTrainingRuns(runs);
 
             } catch (error) {
 
@@ -127,7 +88,9 @@ export default function PredictionPage() {
                 );
 
                 setError(
-                    "Не удалось загрузить обученные модели"
+                    error instanceof Error
+                        ? error.message
+                        : "Не удалось загрузить обученные модели"
                 );
 
             } finally {
@@ -141,10 +104,13 @@ export default function PredictionPage() {
     }, []);
 
 
-    // --------------------------------------------
-    // Dataset IDs of selected models
-    // --------------------------------------------
-
+    /*
+     * Dataset, к которым относятся
+     * выбранные TrainingRun.
+     *
+     * Для одного Prediction все модели
+     * должны быть обучены на одном Dataset.
+     */
     const selectedDatasetIds =
         useMemo(() => {
 
@@ -175,114 +141,81 @@ export default function PredictionPage() {
         ]);
 
 
-    // --------------------------------------------
-    // Load samples
-    // --------------------------------------------
+    /*
+     * Выбор JSON-файла.
+     */
+    function handleFileChange(
+        event: React.ChangeEvent<HTMLInputElement>
+    ) {
 
-    useEffect(() => {
+        const file =
+            event.target.files?.[0] ?? null;
 
-        async function loadSamples() {
+        setSelectedFile(file);
 
-            if (
-                selectedDatasetIds.length === 0
-            ) {
+        /*
+         * Старый результат больше
+         * не относится к новому файлу.
+         */
+        setPrediction(null);
 
-                setSamples([]);
-                setSelectedSampleIds([]);
-
-                return;
-            }
-
-            if (
-                selectedDatasetIds.length > 1
-            ) {
-
-                setSamples([]);
-                setSelectedSampleIds([]);
-
-                return;
-            }
-
-            const datasetId =
-                selectedDatasetIds[0];
-
-            setLoadingSamples(true);
-            setError(null);
-
-            try {
-
-                const data =
-                    await getSamples(
-                        datasetId
-                    );
-
-                setSamples(data);
-
-            } catch (error) {
-
-                console.error(
-                    "Ошибка загрузки образцов:",
-                    error
-                );
-
-                setError(
-                    "Не удалось загрузить образцы"
-                );
-
-            } finally {
-
-                setLoadingSamples(false);
-            }
-        }
-
-        loadSamples();
-
-    }, [selectedDatasetIds]);
+        setError(null);
+    }
 
 
-    // --------------------------------------------
-    // Run Prediction
-    // --------------------------------------------
-
+    /*
+     * Выполнение Prediction.
+     */
     async function handlePrediction() {
 
         setError(null);
         setPrediction(null);
+
 
         if (
             selectedTrainingRunIds.length === 0
         ) {
 
             setError(
-                "Выберите хотя бы одну обученную модель"
+                "Выберите хотя бы одну обученную модель."
             );
 
             return;
         }
 
+
         if (
-            selectedSampleIds.length === 0
+            selectedDatasetIds.length !== 1
         ) {
 
             setError(
-                "Выберите хотя бы один образец"
+                "Все выбранные TrainingRun "
+                + "должны относиться к одному Dataset."
             );
 
             return;
         }
+
+
+        if (!selectedFile) {
+
+            setError(
+                "Выберите JSON-файл с данными."
+            );
+
+            return;
+        }
+
 
         setPredicting(true);
 
         try {
 
             const result =
-                await createPredictions({
-                    training_run_ids:
-                        selectedTrainingRunIds,
-
-                    sample_ids:
-                        selectedSampleIds
-                });
+                await createPredictions(
+                    selectedTrainingRunIds,
+                    selectedFile
+                );
 
             setPrediction(result);
 
@@ -296,7 +229,7 @@ export default function PredictionPage() {
             setError(
                 error instanceof Error
                     ? error.message
-                    : "Ошибка выполнения Prediction"
+                    : "Ошибка выполнения Prediction."
             );
 
         } finally {
@@ -306,19 +239,34 @@ export default function PredictionPage() {
     }
 
 
-    // --------------------------------------------
-    // Render
-    // --------------------------------------------
+    /*
+     * Очистка выбора моделей.
+     */
+    function handleClearModels() {
+
+        setSelectedTrainingRunIds([]);
+
+        setPrediction(null);
+        setError(null);
+    }
+
 
     return (
+        <AppLayout>
         <div>
 
-            <h1>Prediction</h1>
+            <h1>
+                Prediction
+            </h1>
+
 
             {error && (
                 <div
                     style={{
-                        marginBottom: "15px"
+                        marginBottom: "20px",
+                        padding: "10px",
+                        border: "1px solid #cc0000",
+                        borderRadius: "4px"
                     }}
                 >
                     {error}
@@ -326,126 +274,246 @@ export default function PredictionPage() {
             )}
 
 
-            {/* -------------------------------- */}
-            {/* TrainingRun selection             */}
-            {/* -------------------------------- */}
+            {/* ---------------------------------------- */}
+            {/* Обученные модели */}
+            {/* ---------------------------------------- */}
 
-            {loadingTrainingRuns ? (
+            <section>
 
-                <div>
-                    Загрузка обученных моделей...
-                </div>
+                {loadingTrainingRuns ? (
 
-            ) : (
+                    <div>
+                        Загрузка обученных моделей...
+                    </div>
 
-                <TrainingRunSelector
-                    trainingRuns={trainingRuns}
-                    selectedIds={
-                        selectedTrainingRunIds
-                    }
-                    onChange={
-                        setSelectedTrainingRunIds
-                    }
-                />
+                ) : (
 
-            )}
-
-
-            {/* -------------------------------- */}
-            {/* Dataset information               */}
-            {/* -------------------------------- */}
-
-            {selectedDatasetIds.length > 1 && (
-
-                <div>
-                    Выбранные TrainingRun относятся
-                    к разным датасетам. Для одного
-                    Prediction необходимо выбрать
-                    модели из одного датасета.
-                </div>
-
-            )}
-
-
-            {/* -------------------------------- */}
-            {/* Samples                           */}
-            {/* -------------------------------- */}
-
-            {selectedDatasetIds.length === 1 && (
-
-                <div>
-                    {loadingSamples ? (
-
-                        <div>
-                            Загрузка образцов...
-                        </div>
-
-                    ) : (
-
-                        <SampleSelector
-                            samples={samples}
+                    <>
+                        <TrainingRunSelector
+                            trainingRuns={
+                                trainingRuns
+                            }
                             selectedIds={
-                                selectedSampleIds
+                                selectedTrainingRunIds
                             }
                             onChange={
-                                setSelectedSampleIds
+                                setSelectedTrainingRunIds
                             }
                         />
 
-                    )}
-                </div>
+                        {selectedTrainingRunIds.length > 0 && (
+                            <button
+                                type="button"
+                                onClick={
+                                    handleClearModels
+                                }
+                                style={{
+                                    marginTop: "10px"
+                                }}
+                            >
+                                Снять выбор моделей
+                            </button>
+                        )}
+                    </>
+                )}
 
+            </section>
+
+
+            {/* ---------------------------------------- */}
+            {/* Проверка Dataset */}
+            {/* ---------------------------------------- */}
+
+            {selectedTrainingRunIds.length > 0 && (
+                <section
+                    style={{
+                        marginTop: "20px"
+                    }}
+                >
+
+                    <div>
+                        <strong>
+                            Выбрано моделей:
+                        </strong>{" "}
+                        {
+                            selectedTrainingRunIds.length
+                        }
+                    </div>
+
+                    <div>
+                        <strong>
+                            Dataset:
+                        </strong>{" "}
+
+                        {selectedDatasetIds.length === 1
+                            ? selectedDatasetIds[0]
+                            : "несколько Dataset"}
+                    </div>
+
+
+                    {selectedDatasetIds.length > 1 && (
+                        <div
+                            style={{
+                                marginTop: "10px",
+                                padding: "10px",
+                                border: "1px solid #cc0000",
+                                borderRadius: "4px"
+                            }}
+                        >
+                            Нельзя одновременно выполнять
+                            Prediction для моделей,
+                            обученных на разных Dataset.
+                            Выберите модели только
+                            одного Dataset.
+                        </div>
+                    )}
+
+                </section>
             )}
 
 
-            {/* -------------------------------- */}
-            {/* Prediction button                 */}
-            {/* -------------------------------- */}
+            {/* ---------------------------------------- */}
+            {/* JSON */}
+            {/* ---------------------------------------- */}
 
-            <div
+            <section
                 style={{
-                    marginTop: "20px",
-                    marginBottom: "20px"
+                    marginTop: "30px"
+                }}
+            >
+
+                <h2>
+                    Файл данных
+                </h2>
+
+                <p>
+                    Загрузите JSON с образцами,
+                    фактическим износом и признаками.
+                </p>
+
+                <input
+                    type="file"
+                    accept=".json,application/json"
+                    onChange={
+                        handleFileChange
+                    }
+                />
+
+
+                {selectedFile && (
+                    <div
+                        style={{
+                            marginTop: "10px"
+                        }}
+                    >
+
+                        <div>
+                            <strong>
+                                Файл:
+                            </strong>{" "}
+                            {selectedFile.name}
+                        </div>
+
+                        <div>
+                            <strong>
+                                Размер:
+                            </strong>{" "}
+                            {(
+                                selectedFile.size / 1024
+                            ).toFixed(1)}{" "}
+                            KB
+                        </div>
+
+                    </div>
+                )}
+
+            </section>
+
+
+            {/* ---------------------------------------- */}
+            {/* Кнопка Prediction */}
+            {/* ---------------------------------------- */}
+
+            <section
+                style={{
+                    marginTop: "25px"
                 }}
             >
 
                 <button
                     type="button"
-                    disabled={
-                        predicting ||
-                        selectedTrainingRunIds.length === 0 ||
-                        selectedSampleIds.length === 0 ||
-                        selectedDatasetIds.length !== 1
-                    }
                     onClick={
                         handlePrediction
                     }
+                    disabled={
+                        predicting ||
+                        selectedTrainingRunIds.length === 0 ||
+                        selectedDatasetIds.length !== 1 ||
+                        !selectedFile
+                    }
                 >
                     {predicting
-                        ? "Выполнение..."
-                        : "Выполнить Prediction"}
+                        ? "Выполнение прогноза..."
+                        : "Выполнить прогноз"}
                 </button>
 
-            </div>
+            </section>
 
 
-            {/* -------------------------------- */}
-            {/* Result                            */}
-            {/* -------------------------------- */}
+            {/* ---------------------------------------- */}
+            {/* Результат */}
+            {/* ---------------------------------------- */}
 
             {prediction && (
+                <section
+                    style={{
+                        marginTop: "35px"
+                    }}
+                >
 
-                <PredictionTable
-                    predictions={
-                        prediction.predictions
-                    }
-                    sampleIds={
-                        prediction.sample_ids
-                    }
-                />
+                    <div
+                        style={{
+                            marginBottom: "15px"
+                        }}
+                    >
 
+                        <strong>
+                            PredictionBatch:
+                        </strong>{" "}
+                        {prediction.id}
+
+                    </div>
+
+
+                    <div
+                        style={{
+                            marginBottom: "15px"
+                        }}
+                    >
+
+                        <strong>
+                            Образцов:
+                        </strong>{" "}
+                        {
+                            prediction.sample_ids.length
+                        }
+
+                    </div>
+
+
+                    <PredictionTable
+                        predictions={
+                            prediction.predictions
+                        }
+                        sampleIds={
+                            prediction.sample_ids
+                        }
+                    />
+
+                </section>
             )}
 
         </div>
+            </AppLayout>
     );
 }

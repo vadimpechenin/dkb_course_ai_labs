@@ -23,7 +23,9 @@ from app.services.ml.classifier_service import (
 from app.db.core.support.UUIDClass import (
     UUIDClass
 )
-
+from app.services.feature_mapping import (
+    FeatureMappingService
+)
 
 MODEL_DIR = "models"
 
@@ -37,6 +39,12 @@ class TrainingService:
 
         self.ml_service = (
             ClassifierService()
+        )
+
+        self.feature_mapping = (
+            FeatureMappingService(
+                session
+            )
         )
 
     async def train(
@@ -157,63 +165,25 @@ class TrainingService:
             feature_ids
     ):
 
-        statement = (
-            select(
-                FeatureSetting.id,
-                FeatureSetting.feature_name
-            )
-            .where(
-                FeatureSetting.id.in_(feature_ids)
-            )
-        )
-
-        result = self.crud.session.execute(statement)
-
-        id_to_name = {
-            feature_id: feature_name
-            for feature_id, feature_name in result.all()
-        }
-
-        if len(id_to_name) != len(feature_ids):
-            raise ValueError(
-                "Один или несколько выбранных признаков не найдены"
-            )
-
         X = []
-
         y = []
-
         groups = []
-        sample_ = []
+
         for vector, sample in rows:
 
             features = vector.features
 
-            if not isinstance(features, dict):
-                raise ValueError(
-                    f"FeatureVector {vector.id} "
-                    "имеет некорректный формат features"
-                )
-
-            values = []
-
-            for feature_id in feature_ids:
-
-                feature_name = id_to_name[feature_id]
-
-                if feature_name not in features:
-                    raise ValueError(
-                        f"Признак {feature_name} "
-                        f"отсутствует в FeatureVector {vector.id}"
+            values = (
+                self.feature_mapping.extract_values(
+                    features=features,
+                    feature_ids=feature_ids,
+                    source_name=(
+                        f"FeatureVector {vector.id}"
                     )
-
-                values.append(
-                    float(features[feature_name])
                 )
-
-            X.append(
-                values
             )
+
+            X.append(values)
 
             if vector.target_class is None:
                 raise ValueError(
@@ -223,12 +193,9 @@ class TrainingService:
                 )
 
             y.append(
-                vector.target_class
+                int(vector.target_class)
             )
-            #print('Экземпляр:' + sample.id)
-            #print('Эксперимент:' + sample.tool_id)
-            #print('Инструмент:' + sample.tool_id)
-            sample_.append(sample.id)
+
             groups.append(
                 sample.tool_id
             )
@@ -238,23 +205,29 @@ class TrainingService:
             dtype=float
         )
 
-        y = np.asarray(y)
+        y = np.asarray(
+            y,
+            dtype=int
+        )
 
         groups = np.asarray(
             groups
         )
 
-        if len(
-                X.shape
-        ) != 2:
+        if len(X.shape) != 2:
             raise ValueError(
                 "FeatureVector имеет "
                 "некорректную размерность."
             )
 
-        if len(
-                np.unique(groups)
-        ) < 2:
+        if X.shape[1] != len(feature_ids):
+            raise ValueError(
+                "Количество признаков "
+                "не соответствует выбранному "
+                "feature_ids."
+            )
+
+        if len(np.unique(groups)) < 2:
             raise HTTPException(
                 status_code=400,
                 detail=(
