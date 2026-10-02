@@ -4,6 +4,12 @@ import {
     useState
 } from "react";
 
+import PredictionWearChart
+    from "../components/predictions/PredictionWearChart";
+
+import PredictionMetrics
+    from "../components/predictions/PredictionMetrics";
+
 import AppLayout
     from "../components/layout/AppLayout";
 
@@ -465,53 +471,83 @@ export default function PredictionPage() {
             {/* ---------------------------------------- */}
 
             {prediction && (
-                <section
-                    style={{
-                        marginTop: "35px"
-                    }}
-                >
+    <section
+        style={{
+            marginTop: "35px"
+        }}
+    >
 
-                    <div
-                        style={{
-                            marginBottom: "15px"
-                        }}
-                    >
+        {/* ===================================== */}
+        {/* 1. График Wear */}
+        {/* ===================================== */}
 
-                        <strong>
-                            PredictionBatch:
-                        </strong>{" "}
-                        {prediction.id}
+        <PredictionWearChart
+            predictions={
+                prediction.predictions
+            }
+        />
 
-                    </div>
+        {/* ===================================== */}
+        {/* 2. Метрики */}
+        {/* ===================================== */}
 
+        <div
+            style={{
+                marginTop: "40px"
+            }}
+        >
+            <PredictionMetrics
+                predictions={
+                    prediction.predictions
+                }
+            />
+        </div>
 
-                    <div
-                        style={{
-                            marginBottom: "15px"
-                        }}
-                    >
+        {/* ===================================== */}
+        {/* 3. Таблица */}
+        {/* ===================================== */}
 
-                        <strong>
-                            Образцов:
-                        </strong>{" "}
-                        {
-                            prediction.sample_ids.length
-                        }
+        <div
+            style={{
+                marginTop: "40px"
+            }}
+        >
 
-                    </div>
+            <div
+                style={{
+                    marginBottom: "15px"
+                }}
+            >
+                <strong>
+                    PredictionBatch:
+                </strong>{" "}
+                {prediction.id}
+            </div>
 
+            <div
+                style={{
+                    marginBottom: "15px"
+                }}
+            >
+                <strong>
+                    Образцов:
+                </strong>{" "}
+                {prediction.sample_ids.length}
+            </div>
 
-                    <PredictionTable
-                        predictions={
-                            prediction.predictions
-                        }
-                        sampleIds={
-                            prediction.sample_ids
-                        }
-                    />
+            <PredictionTable
+                predictions={
+                    prediction.predictions
+                }
+                sampleIds={
+                    prediction.sample_ids
+                }
+            />
 
-                </section>
-            )}
+        </div>
+
+    </section>
+)}
 
         </div>
             </AppLayout>

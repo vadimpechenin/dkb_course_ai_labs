@@ -1,7 +1,13 @@
 -- 1. Удаляем старую таблицу (если она существует)
 DROP TABLE IF EXISTS predictions CASCADE;
 
+
 -- 2. Создаем таблицу с новой структурой
+
+CREATE TABLE prediction_batches (
+    id VARCHAR(50) PRIMARY KEY,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
 CREATE TABLE predictions (
     id VARCHAR(50) PRIMARY KEY,
     batch_id VARCHAR(50) NOT NULL,

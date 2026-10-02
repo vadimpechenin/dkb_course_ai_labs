@@ -1,416 +1,309 @@
-import type {
-    PredictionItem
-} from "../../types/Prediction";
+import type { PredictionItem } from "../../types/Prediction";
 
-
-interface PredictionTableProps {
-
+interface Props {
     predictions: PredictionItem[];
-
     sampleIds: string[];
 }
-
-
-interface ModelInfo {
-
-    trainingRunId: string;
-
-    modelName: string;
-}
-
-
-function formatConfidence(
-    value: number | null | undefined
-): string {
-
-    if (
-        value === null ||
-        value === undefined
-    ) {
-        return "—";
-    }
-
-    return `${(
-        value * 100
-    ).toFixed(1)} %`;
-}
-
-
-function formatWear(
-    value: number | null | undefined
-): string {
-
-    if (
-        value === null ||
-        value === undefined
-    ) {
-        return "—";
-    }
-
-    return value.toFixed(4);
-}
-
 
 export default function PredictionTable({
     predictions,
     sampleIds
-}: PredictionTableProps) {
+}: Props) {
 
+    const modelIds = Array.from(
+        new Set(
+            predictions.map(
+                prediction =>
+                    prediction.training_run_id
+            )
+        )
+    );
 
-    /*
-     * Список моделей.
-     */
-    const models =
-        new Map<
-            string,
-            ModelInfo
-        >();
+    const modelNames = new Map<
+        string,
+        string
+    >();
 
+    for (const prediction of predictions) {
 
-    /*
-     * predictionMap:
-     *
-     * sample_id
-     *      ↓
-     * training_run_id
-     *      ↓
-     * PredictionItem
-     */
-    const predictionMap =
-        new Map<
-            string,
-            Map<
-                string,
-                PredictionItem
-            >
-        >();
-
-
-    for (
-        const prediction
-        of predictions
-    ) {
-
-
-        /*
-         * Добавляем модель.
-         */
         if (
-            !models.has(
+            !modelNames.has(
                 prediction.training_run_id
             )
         ) {
-
-            models.set(
+            modelNames.set(
                 prediction.training_run_id,
-                {
-                    trainingRunId:
-                        prediction.training_run_id,
-
-                    modelName:
-                        prediction.model_name
-                        ??
-                        prediction.training_run_id
-                }
+                prediction.model_name ??
+                    prediction.training_run_id
             );
         }
-
-
-        /*
-         * Добавляем Prediction
-         * в соответствующий sample.
-         */
-        if (
-            !predictionMap.has(
-                prediction.sample_id
-            )
-        ) {
-
-            predictionMap.set(
-                prediction.sample_id,
-                new Map()
-            );
-        }
-
-
-        predictionMap
-            .get(
-                prediction.sample_id
-            )!
-            .set(
-                prediction.training_run_id,
-                prediction
-            );
     }
 
+    function getPrediction(
+        sampleId: string,
+        trainingRunId: string
+    ): PredictionItem | undefined {
 
-    const modelList =
-        Array.from(
-            models.values()
-        );
-
-
-    if (
-        sampleIds.length === 0 ||
-        modelList.length === 0
-    ) {
-
-        return (
-            <div>
-                Нет результатов Prediction.
-            </div>
+        return predictions.find(
+            prediction =>
+                prediction.sample_id ===
+                    sampleId &&
+                prediction.training_run_id ===
+                    trainingRunId
         );
     }
-
 
     return (
-
-        <div
-            style={{
-                overflowX: "auto"
-            }}
-        >
+        <div>
 
             <h2>
                 Результаты Prediction
             </h2>
 
-
-            <table
+            <div
                 style={{
-                    borderCollapse: "collapse",
-                    width: "100%"
+                    overflowX: "auto"
                 }}
             >
 
-                <thead>
+                <table
+                    style={{
+                        borderCollapse:
+                            "collapse",
+                        width: "100%"
+                    }}
+                >
 
-                    <tr>
+                    <thead>
 
-                        <th
-                            style={{
-                                padding: "8px",
-                                textAlign: "left"
-                            }}
-                        >
-                            Образец
-                        </th>
+                        <tr>
 
+                            <th style={thStyle}>
+                                №
+                            </th>
 
-                        <th
-                            style={{
-                                padding: "8px",
-                                textAlign: "left"
-                            }}
-                        >
-                            Фактический износ
-                        </th>
+                            <th style={thStyle}>
+                                Sample
+                            </th>
 
+                            <th style={thStyle}>
+                                Wear
+                            </th>
 
-                        <th
-                            style={{
-                                padding: "8px",
-                                textAlign: "left"
-                            }}
-                        >
-                            Факт. класс
-                        </th>
+                            <th style={thStyle}>
+                                Actual
+                            </th>
 
+                            {modelIds.map(
+                                modelId => (
 
-                        {modelList.map(
-                            model => (
-
-                                <th
-                                    key={
-                                        model.trainingRunId
-                                    }
-                                    style={{
-                                        padding: "8px",
-                                        textAlign: "left"
-                                    }}
-                                >
-                                    {
-                                        model.modelName
-                                    }
-                                </th>
-
-                            )
-                        )}
-
-                    </tr>
-
-                </thead>
-
-
-                <tbody>
-
-                    {sampleIds.map(
-                        sampleId => {
-
-                            const row =
-                                predictionMap.get(
-                                    sampleId
-                                );
-
-
-                            /*
-                             * Берём первый Prediction
-                             * только для actual_wear /
-                             * actual_class.
-                             *
-                             * Они одинаковы для всех
-                             * моделей одного sample.
-                             */
-                            const firstPrediction =
-                                row
-                                    ? Array.from(
-                                        row.values()
-                                    )[0]
-                                    : undefined;
-
-
-                            return (
-
-                                <tr
-                                    key={
-                                        sampleId
-                                    }
-                                >
-
-                                    <td
-                                        style={{
-                                            padding: "8px"
-                                        }}
+                                    <th
+                                        key={
+                                            modelId
+                                        }
+                                        style={
+                                            thStyle
+                                        }
                                     >
-                                        <strong>
+                                        {
+                                            modelNames.get(
+                                                modelId
+                                            )
+                                        }
+                                    </th>
+
+                                )
+                            )}
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        {sampleIds.map(
+                            (
+                                sampleId,
+                                index
+                            ) => {
+
+                                const firstPrediction =
+                                    getPrediction(
+                                        sampleId,
+                                        modelIds[0]
+                                    );
+
+                                return (
+                                    <tr
+                                        key={
+                                            sampleId
+                                        }
+                                    >
+
+                                        <td
+                                            style={
+                                                tdStyle
+                                            }
+                                        >
+                                            {
+                                                index +
+                                                1
+                                            }
+                                        </td>
+
+                                        <td
+                                            style={
+                                                tdStyle
+                                            }
+                                        >
                                             {
                                                 sampleId
                                             }
-                                        </strong>
-                                    </td>
+                                        </td>
 
-
-                                    <td
-                                        style={{
-                                            padding: "8px"
-                                        }}
-                                    >
-                                        {
-                                            formatWear(
+                                        <td
+                                            style={
+                                                tdStyle
+                                            }
+                                        >
+                                            {
                                                 firstPrediction
                                                     ?.actual_wear
-                                            )
-                                        }
-                                    </td>
+                                                    ?.toFixed(
+                                                        4
+                                                    )
+                                            }
+                                        </td>
 
+                                        <td
+                                            style={
+                                                {
+                                                    ...tdStyle,
+                                                    fontWeight:
+                                                        "bold"
+                                                }
+                                            }
+                                        >
+                                            {
+                                                firstPrediction
+                                                    ?.actual_class
+                                            }
+                                        </td>
 
-                                    <td
-                                        style={{
-                                            padding: "8px"
-                                        }}
-                                    >
-                                        {
-                                            firstPrediction
-                                                ?.actual_class
-                                                ?? "—"
-                                        }
-                                    </td>
+                                        {modelIds.map(
+                                            modelId => {
 
+                                                const prediction =
+                                                    getPrediction(
+                                                        sampleId,
+                                                        modelId
+                                                    );
 
-                                    {modelList.map(
-                                        model => {
+                                                if (
+                                                    !prediction
+                                                ) {
+                                                    return (
+                                                        <td
+                                                            key={
+                                                                modelId
+                                                            }
+                                                            style={
+                                                                tdStyle
+                                                            }
+                                                        >
+                                                            —
+                                                        </td>
+                                                    );
+                                                }
 
-                                            const item =
-                                                row?.get(
-                                                    model.trainingRunId
-                                                );
-
-
-                                            if (!item) {
+                                                const isCorrect =
+                                                    prediction
+                                                        .predicted_class ===
+                                                    prediction
+                                                        .actual_class;
 
                                                 return (
-
                                                     <td
                                                         key={
-                                                            model.trainingRunId
+                                                            modelId
                                                         }
                                                         style={{
-                                                            padding: "8px"
+                                                            ...tdStyle,
+                                                            color:
+                                                                isCorrect
+                                                                    ? "inherit"
+                                                                    : "#d32f2f",
+                                                            backgroundColor:
+                                                                isCorrect
+                                                                    ? "transparent"
+                                                                    : "#ffebee",
+                                                            fontWeight:
+                                                                isCorrect
+                                                                    ? "normal"
+                                                                    : "bold"
                                                         }}
                                                     >
-                                                        —
-                                                    </td>
 
-                                                );
-                                            }
-
-
-                                            return (
-
-                                                <td
-                                                    key={
-                                                        model.trainingRunId
-                                                    }
-                                                    style={{
-                                                        padding: "8px"
-                                                    }}
-                                                >
-
-                                                    <div>
-
-                                                        <strong>
-                                                            Класс:{" "}
+                                                        <div>
                                                             {
-                                                                item.predicted_class
-                                                                ?? "—"
+                                                                prediction
+                                                                    .predicted_class
                                                             }
-                                                        </strong>
-
-                                                    </div>
-
-
-                                                    <div>
-
-                                                        Уверенность:{" "}
-
-                                                        {
-                                                            formatConfidence(
-                                                                item.confidence
-                                                            )
-                                                        }
-
-                                                    </div>
-
-
-                                                    {item.predicted_class !==
-                                                        item.actual_class && (
-
-                                                        <div
-                                                            style={{
-                                                                marginTop: "4px"
-                                                            }}
-                                                        >
-                                                            ⚠ Ошибка
                                                         </div>
 
-                                                    )}
+                                                        {prediction.confidence !==
+                                                            null &&
+                                                            prediction.confidence !==
+                                                                undefined && (
+                                                                <div
+                                                                    style={{
+                                                                        fontSize:
+                                                                            "12px",
+                                                                        color:
+                                                                            "#777"
+                                                                    }}
+                                                                >
+                                                                    confidence:{" "}
+                                                                    {(
+                                                                        prediction
+                                                                            .confidence *
+                                                                        100
+                                                                    ).toFixed(
+                                                                        1
+                                                                    )}
+                                                                    %
+                                                                </div>
+                                                            )}
 
-                                                </td>
+                                                    </td>
+                                                );
+                                            }
+                                        )}
 
-                                            );
-                                        }
-                                    )}
+                                    </tr>
+                                );
+                            }
+                        )}
 
-                                </tr>
+                    </tbody>
 
-                            );
-                        }
-                    )}
+                </table>
 
-                </tbody>
-
-            </table>
+            </div>
 
         </div>
     );
 }
+
+const thStyle: React.CSSProperties = {
+    border: "1px solid #ccc",
+    padding: "8px 10px",
+    textAlign: "left",
+    backgroundColor: "#f5f5f5",
+    whiteSpace: "nowrap"
+};
+
+const tdStyle: React.CSSProperties = {
+    border: "1px solid #ccc",
+    padding: "7px 10px"
+};

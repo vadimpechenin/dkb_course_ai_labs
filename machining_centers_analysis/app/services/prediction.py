@@ -112,7 +112,8 @@ class PredictionService:
             float(value)
             for value in borders
         )
-
+        # Увеличиваем каждый элемент на 1000
+        borders = [x*1000 for x in borders]
         return border_id, borders
 
     def _classify_wear(
