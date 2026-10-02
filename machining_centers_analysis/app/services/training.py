@@ -4,6 +4,7 @@ from app.db.models.feature_setting import FeatureSetting
 import json
 import os
 import time
+from sqlalchemy import select
 
 import joblib
 
@@ -106,7 +107,7 @@ class TrainingService:
 
         try:
         """
-        X, y, groups = self._prepare_data(rows)
+        X, y, groups = self._prepare_data(rows, request.feature_ids)
         """
             print(
                 "TRAINING: data prepared:",
@@ -152,8 +153,31 @@ class TrainingService:
 
     def _prepare_data(
             self,
-            rows
+            rows,
+            feature_ids
     ):
+
+        statement = (
+            select(
+                FeatureSetting.id,
+                FeatureSetting.feature_name
+            )
+            .where(
+                FeatureSetting.id.in_(feature_ids)
+            )
+        )
+
+        result = self.crud.session.execute(statement)
+
+        id_to_name = {
+            feature_id: feature_name
+            for feature_id, feature_name in result.all()
+        }
+
+        if len(id_to_name) != len(feature_ids):
+            raise ValueError(
+                "Один или несколько выбранных признаков не найдены"
+            )
 
         X = []
 
@@ -165,26 +189,26 @@ class TrainingService:
 
             features = vector.features
 
-            if isinstance(
-                    features,
-                    dict
-            ):
-
-                values = list(
-                    features.values()
+            if not isinstance(features, dict):
+                raise ValueError(
+                    f"FeatureVector {vector.id} "
+                    "имеет некорректный формат features"
                 )
 
-            else:
+            values = []
 
-                values = features
+            for feature_id in feature_ids:
 
-            if not isinstance(
-                    values,
-                    list
-            ):
-                raise ValueError(
-                    f"Некорректный формат "
-                    f"features: {vector.id}"
+                feature_name = id_to_name[feature_id]
+
+                if feature_name not in features:
+                    raise ValueError(
+                        f"Признак {feature_name} "
+                        f"отсутствует в FeatureVector {vector.id}"
+                    )
+
+                values.append(
+                    float(features[feature_name])
                 )
 
             X.append(
