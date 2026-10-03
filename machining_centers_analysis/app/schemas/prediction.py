@@ -43,3 +43,26 @@ class PredictionBatchResponse(BaseModel):
 
 class DeleteTrainingRunsRequest(BaseModel):
     training_run_ids: list[str]
+
+class PredictionHistoryItem(BaseModel):
+    id: str
+    created_at: Optional[str] = None
+
+    training_run_ids: list[str]
+    model_names: list[str]
+
+    sample_count: int
+
+
+class PredictionHistoryResponse(BaseModel):
+    items: list[PredictionHistoryItem]
+
+
+class PredictionHistoryDetailResponse(BaseModel):
+    id: str
+    created_at: Optional[str] = None
+
+    training_run_ids: list[str]
+    sample_ids: list[str]
+
+    predictions: list[PredictionItemResponse]

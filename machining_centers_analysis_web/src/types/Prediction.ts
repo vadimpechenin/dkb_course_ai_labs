@@ -58,3 +58,15 @@ export interface DeleteTrainingRunsResponse {
         error: string;
     }[];
 }
+
+export interface PredictionHistoryItem {
+    id: string;
+    created_at: string | null;
+    training_run_ids: string[];
+    model_names: string[];
+    sample_count: number;
+}
+
+export interface PredictionHistoryResponse {
+    items: PredictionHistoryItem[];
+}

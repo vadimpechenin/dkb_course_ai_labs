@@ -429,7 +429,7 @@ export default function PredictionMetrics({
             >
 
                 <h2>
-                    Confusion Matrix
+                    Матрица ошибок
                 </h2>
 
                 {confusionMatrices.map(

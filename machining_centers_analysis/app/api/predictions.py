@@ -13,7 +13,7 @@ from app.db.core.session import SQLDataBase
 from app.schemas.prediction import (
     PredictionBatchResponse,
     PredictionItemResponse,
-    DeleteTrainingRunsRequest
+    DeleteTrainingRunsRequest, PredictionHistoryDetailResponse, PredictionHistoryResponse
 )
 
 from app.services.prediction import (
@@ -176,6 +176,107 @@ async def create_predictions(
 
         database.session.close()
 
+@router.get(
+    "/history",
+    response_model=PredictionHistoryResponse
+)
+async def get_prediction_history(
+    training_run_ids: list[str] | None = None
+):
+    database = SQLDataBase()
+    database.create_session()
+
+    try:
+
+        service = PredictionService(
+            database.session
+        )
+
+        items = service.get_history(
+            training_run_ids
+        )
+
+        return {
+            "items": items
+        }
+
+    finally:
+        database.session.close()
+
+@router.get(
+    "/history/{batch_id}",
+    response_model=PredictionHistoryDetailResponse
+)
+async def get_prediction_history_item(
+    batch_id: str
+):
+    database = SQLDataBase()
+    database.create_session()
+
+    try:
+
+        service = PredictionService(
+            database.session
+        )
+
+        try:
+            return service.get_history_item(
+                batch_id
+            )
+
+        except ValueError as error:
+
+            raise HTTPException(
+                status_code=404,
+                detail=str(error)
+            )
+
+    finally:
+        database.session.close()
+
+
+@router.delete(
+    "/history/{batch_id}"
+)
+async def delete_prediction_history_item(
+    batch_id: str
+):
+    database = SQLDataBase()
+    database.create_session()
+
+    try:
+
+        service = PredictionService(
+            database.session
+        )
+
+        try:
+
+            result = (
+                service.delete_prediction_batch(
+                    batch_id
+                )
+            )
+
+            return result
+
+        except ValueError as error:
+
+            database.session.rollback()
+
+            raise HTTPException(
+                status_code=404,
+                detail=str(error)
+            )
+
+        except Exception:
+
+            database.session.rollback()
+
+            raise
+
+    finally:
+        database.session.close()
 
 @router.get(
     "/{prediction_id}",
@@ -335,3 +436,5 @@ async def delete_training_runs(
     finally:
 
         database.session.close()
+
+

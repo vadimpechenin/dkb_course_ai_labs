@@ -364,7 +364,7 @@ export default function PredictionPage() {
         <div>
 
             <h1>
-                Prediction
+                Прогноз
             </h1>
 
 

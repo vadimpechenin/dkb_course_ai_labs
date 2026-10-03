@@ -1,4 +1,4 @@
-from sqlalchemy import select
+from sqlalchemy import select, exists
 
 from app.db.models.prediction import Prediction
 from app.db.models.prediction_batch import PredictionBatch
@@ -179,3 +179,114 @@ class PredictionCRUD:
                     self.session.delete(
                         batch
                     )
+
+    def get_prediction_history(
+            self,
+            training_run_ids: list[str] | None = None
+    ):
+
+        statement = (
+            select(
+                PredictionBatch,
+                Prediction,
+                TrainingRun,
+                MLModel
+            )
+            .join(
+                Prediction,
+                Prediction.batch_id ==
+                PredictionBatch.id
+            )
+            .join(
+                TrainingRun,
+                Prediction.training_run_id ==
+                TrainingRun.id
+            )
+            .join(
+                MLModel,
+                TrainingRun.model_id ==
+                MLModel.id
+            )
+            .order_by(
+                PredictionBatch.created_at.desc(),
+                Prediction.training_run_id,
+                Prediction.input_sample_id
+            )
+        )
+
+        if training_run_ids:
+            batch_filter = (
+                select(Prediction.id)
+                .where(
+                    Prediction.batch_id ==
+                    PredictionBatch.id
+                )
+                .where(
+                    Prediction.training_run_id.in_(
+                        training_run_ids
+                    )
+                )
+                .exists()
+            )
+
+            statement = statement.where(
+                batch_filter
+            )
+
+        result = self.session.execute(
+            statement
+        )
+
+        return result.all()
+
+    def get_prediction_batch_details(
+            self,
+            batch_id: str
+    ):
+        statement = (
+            select(
+                Prediction,
+                TrainingRun,
+                MLModel
+            )
+            .join(
+                TrainingRun,
+                Prediction.training_run_id ==
+                TrainingRun.id
+            )
+            .join(
+                MLModel,
+                TrainingRun.model_id ==
+                MLModel.id
+            )
+            .where(
+                Prediction.batch_id ==
+                batch_id
+            )
+            .order_by(
+                Prediction.training_run_id,
+                Prediction.input_sample_id
+            )
+        )
+
+        result = self.session.execute(
+            statement
+        )
+
+        return result.all()
+
+    def delete_prediction_batch(
+            self,
+            batch_id: str
+    ):
+        batch = self.session.get(
+            PredictionBatch,
+            batch_id
+        )
+
+        if batch is None:
+            return False
+
+        self.session.delete(batch)
+
+        return True

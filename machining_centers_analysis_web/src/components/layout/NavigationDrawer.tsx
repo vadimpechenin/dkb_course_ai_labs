@@ -64,6 +64,13 @@ export default function NavigationDrawer() {
                     <ListItemText primary="Прогноз"/>
 
                 </ListItemButton>
+
+                <ListItemButton
+                    component={Link}
+                    to="/history"
+                >
+                    <ListItemText primary="История" />
+                </ListItemButton>
             </List>
 
         </Drawer>

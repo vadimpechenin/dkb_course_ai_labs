@@ -5,6 +5,7 @@ import DatasetsPage from "../pages/DatasetsPage";
 import FeaturesPage from "../pages/FeaturesPage";
 import TrainingPage from "../pages/TrainingPage";
 import PredictionsPage from "../pages/PredictionsPage";
+import HistoryPage 	from "../pages/HistoryPage";
 
 export default function AppRouter(){
 
@@ -42,6 +43,11 @@ export default function AppRouter(){
 						path="/predictions"
 						element={<PredictionsPage />}
 					/>
+
+				<Route
+					path="/history"
+					element={<HistoryPage />}
+				/>
 
             </Routes>
 

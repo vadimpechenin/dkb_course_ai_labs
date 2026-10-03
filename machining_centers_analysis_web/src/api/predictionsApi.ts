@@ -2,7 +2,7 @@ import api from "../services/axios";
 
 import type {
     PredictionBatch,
-    DeleteTrainingRunsResponse
+    DeleteTrainingRunsResponse, PredictionHistoryItem, PredictionHistoryResponse
 } from "../types/Prediction";
 
 
@@ -67,4 +67,53 @@ export async function deleteTrainingRuns(
         );
 
     return response.data;
+}
+
+export async function getPredictionHistory(
+    trainingRunIds: string[] = []
+): Promise<PredictionHistoryItem[]> {
+    console.log("Отправка запроса на историю")
+    //console.log(JSON.stringify(response.data, null, 2));
+    const params = new URLSearchParams();
+
+    for (
+        const trainingRunId
+        of trainingRunIds
+        ) {
+        params.append(
+            "training_run_ids",
+            trainingRunId
+        );
+    }
+    console.log(params)
+    const response =
+        await api.get<PredictionHistoryResponse>(
+            "/predictions/history",
+            {
+                params
+            }
+        );
+
+    return response.data.items;
+}
+
+export async function getPredictionHistoryItem(
+    batchId: string
+): Promise<PredictionBatch> {
+
+    const response =
+        await api.get<PredictionBatch>(
+            `/predictions/history/${batchId}`
+        );
+
+    return response.data;
+}
+
+export async function deletePredictionHistoryItem(
+    batchId: string
+): Promise<void> {
+
+    await api.delete(
+        `/predictions/history/${batchId}`
+    );
 }

@@ -1177,3 +1177,193 @@ class PredictionService:
             "file_errors":
                 file_errors
         }
+
+    def get_history(
+            self,
+            training_run_ids: list[str] | None = None
+    ):
+
+        rows = self.crud.get_prediction_history(
+            training_run_ids
+        )
+
+        batches = {}
+
+        for (
+                batch,
+                prediction,
+                training_run,
+                ml_model
+        ) in rows:
+
+            if batch.id not in batches:
+                batches[batch.id] = {
+                    "id": batch.id,
+                    "created_at": (
+                        batch.created_at.isoformat()
+                        if batch.created_at
+                        else None
+                    ),
+                    "training_run_ids": [],
+                    "model_names": [],
+                    "sample_ids": set()
+                }
+
+            item = batches[batch.id]
+
+            if (
+                    training_run.id
+                    not in item["training_run_ids"]
+            ):
+                item["training_run_ids"].append(
+                    training_run.id
+                )
+
+            if (
+                    ml_model.name
+                    not in item["model_names"]
+            ):
+                item["model_names"].append(
+                    ml_model.name
+                )
+
+            item["sample_ids"].add(
+                prediction.input_sample_id
+            )
+
+        result = []
+
+        for item in batches.values():
+            result.append({
+                "id": item["id"],
+                "created_at": item["created_at"],
+                "training_run_ids":
+                    item["training_run_ids"],
+                "model_names":
+                    item["model_names"],
+                "sample_count":
+                    len(item["sample_ids"])
+            })
+
+        return result
+
+    def get_history_item(
+            self,
+            batch_id: str
+    ):
+
+        batch = self.crud.get_batch(
+            batch_id
+        )
+
+        if batch is None:
+            raise ValueError(
+                f"PredictionBatch {batch_id} не найден"
+            )
+
+        rows = (
+            self.crud.get_prediction_batch_details(
+                batch_id
+            )
+        )
+
+        if not rows:
+            raise ValueError(
+                f"PredictionBatch {batch_id} не содержит Prediction"
+            )
+
+        training_run_ids = []
+        sample_ids = []
+        predictions = []
+
+        for (
+                prediction,
+                training_run,
+                ml_model
+        ) in rows:
+
+            if (
+                    training_run.id
+                    not in training_run_ids
+            ):
+                training_run_ids.append(
+                    training_run.id
+                )
+
+            if (
+                    prediction.input_sample_id
+                    not in sample_ids
+            ):
+                sample_ids.append(
+                    prediction.input_sample_id
+                )
+
+            predictions.append({
+                "id": prediction.id,
+
+                "training_run_id":
+                    training_run.id,
+
+                "model_name":
+                    ml_model.name,
+
+                "sample_id":
+                    prediction.input_sample_id,
+
+                "actual_wear":
+                    prediction.actual_wear,
+
+                "actual_class":
+                    prediction.actual_class,
+
+                "predicted_class":
+                    prediction.predicted_class,
+
+                "confidence":
+                    prediction.confidence,
+
+                "probabilities":
+                    prediction.probabilities
+            })
+
+        return {
+            "id": batch.id,
+
+            "created_at": (
+                batch.created_at.isoformat()
+                if batch.created_at
+                else None
+            ),
+
+            "training_run_ids":
+                training_run_ids,
+
+            "sample_ids":
+                sample_ids,
+
+            "predictions":
+                predictions
+        }
+
+    def delete_prediction_batch(
+            self,
+            batch_id: str
+    ):
+
+        deleted = (
+            self.crud.delete_prediction_batch(
+                batch_id
+            )
+        )
+
+        if not deleted:
+            raise ValueError(
+                f"PredictionBatch {batch_id} не найден"
+            )
+
+        self.session.commit()
+
+        return {
+            "id": batch_id,
+            "deleted": True
+        }
