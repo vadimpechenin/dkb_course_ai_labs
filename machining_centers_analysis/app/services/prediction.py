@@ -1,15 +1,15 @@
-import json
 import os
 import uuid
+import shutil
 
 import joblib
 import numpy as np
 from sqlalchemy import select
 
+from app.crud.prediction import PredictionCRUD
 from app.db.models.prediction import Prediction
 from app.db.models.prediction_batch import PredictionBatch
 from app.db.models.feature_vectors import FeatureVector
-from app.db.models.feature_setting import FeatureSetting
 from app.db.models.signal_samples import SignalSample
 from app.db.models.training_run import TrainingRun
 from app.db.models.model_file import ModelFile
@@ -32,6 +32,9 @@ class PredictionService:
             FeatureMappingService(
                 session
             )
+        )
+        self.crud = PredictionCRUD(
+            session
         )
 
     def _get_wear_border_for_dataset(
@@ -1007,3 +1010,170 @@ class PredictionService:
                 )
 
         return None
+
+    def delete_training_runs(
+            self,
+            training_run_ids: list[str]
+    ):
+        if not training_run_ids:
+            raise ValueError(
+                "Необходимо выбрать хотя бы одну модель"
+            )
+
+        # ---------------------------------------------
+        # 1. Получаем TrainingRun
+        # ---------------------------------------------
+
+        training_runs = (
+            self.crud.get_training_runs_for_delete(
+                training_run_ids
+            )
+        )
+
+        found_ids = {
+            training_run.id
+            for training_run in training_runs
+        }
+
+        requested_ids = set(
+            training_run_ids
+        )
+
+        missing_ids = (
+                requested_ids - found_ids
+        )
+
+        if missing_ids:
+            raise ValueError(
+                "Не найдены TrainingRun: "
+                + ", ".join(missing_ids)
+            )
+
+        # ---------------------------------------------
+        # 2. Получаем ModelFile
+        # ---------------------------------------------
+
+        model_files = (
+            self.crud.get_model_files_for_training_runs(
+                training_run_ids
+            )
+        )
+
+        # ---------------------------------------------
+        # 3. Запоминаем папки моделей
+        # ---------------------------------------------
+
+        model_directories = set()
+
+        for model_file in model_files:
+
+            paths = [
+                model_file.weights_path,
+                model_file.scaler_path,
+                model_file.feature_list_path,
+                model_file.metadata_path
+            ]
+
+            for path in paths:
+
+                if not path:
+                    continue
+
+                directory = os.path.dirname(
+                    path
+                )
+
+                if directory:
+                    model_directories.add(
+                        os.path.abspath(
+                            directory
+                        )
+                    )
+
+        # ---------------------------------------------
+        # 4. Удаляем Prediction
+        #
+        # Это необходимо, поскольку:
+        #
+        # Prediction.training_run_id
+        #       ↓
+        # TrainingRun.id
+        #
+        # и текущий FK не CASCADE.
+        # ---------------------------------------------
+
+        batch_ids = (
+            self.crud.delete_predictions_for_training_runs(
+                training_run_ids
+            )
+        )
+        self.crud.delete_empty_prediction_batches(
+            batch_ids
+        )
+        # ---------------------------------------------
+        # 5. Удаляем ModelFile
+        # ---------------------------------------------
+
+        self.crud.delete_model_files(
+            model_files
+        )
+
+        # ---------------------------------------------
+        # 6. Удаляем TrainingRun
+        # ---------------------------------------------
+
+        self.crud.delete_training_runs(
+            training_runs
+        )
+
+        # ---------------------------------------------
+        # 7. Сохраняем изменения БД
+        # ---------------------------------------------
+
+        self.session.commit()
+
+        # ---------------------------------------------
+        # 8. После успешного commit удаляем
+        #    папки моделей
+        # ---------------------------------------------
+
+        deleted_directories = []
+        file_errors = []
+
+        for directory in model_directories:
+
+            if not os.path.exists(
+                    directory
+            ):
+                continue
+
+            try:
+
+                shutil.rmtree(
+                    directory
+                )
+
+                deleted_directories.append(
+                    directory
+                )
+
+            except Exception as error:
+
+                file_errors.append({
+                    "directory": directory,
+                    "error": str(error)
+                })
+
+        return {
+            "deleted_training_run_ids":
+                training_run_ids,
+
+            "deleted_model_files":
+                len(model_files),
+
+            "deleted_model_directories":
+                deleted_directories,
+
+            "file_errors":
+                file_errors
+        }

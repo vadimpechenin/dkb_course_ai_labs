@@ -18,7 +18,8 @@ import {
 } from "../api/trainingApi";
 import type {TrainingRunListItem} from "../types/Training"
 import {
-    createPredictions
+    createPredictions,
+    deleteTrainingRuns
 } from "../api/predictionsApi";
 
 import type {
@@ -67,7 +68,11 @@ export default function PredictionPage() {
         error,
         setError
     ] = useState<string | null>(null);
+    const [deleting, setDeleting] =
+        useState(false);
 
+    const [deleteMessage, setDeleteMessage] =
+        useState<string | null>(null);
 
     /*
      * Загрузка списка обученных моделей.
@@ -256,6 +261,103 @@ export default function PredictionPage() {
         setError(null);
     }
 
+    async function handleDeleteTrainingRuns() {
+
+        if (
+            selectedTrainingRunIds.length === 0
+        ) {
+            setError(
+                "Выберите хотя бы одну обученную модель."
+            );
+
+            return;
+        }
+
+        const confirmed =
+            window.confirm(
+                `Удалить выбранные модели (${selectedTrainingRunIds.length})?\n\n` +
+                "Будут удалены:\n" +
+                "• записи TrainingRun;\n" +
+                "• связанные ModelFile;\n" +
+                "• результаты Prediction этих моделей;\n" +
+                "• папки моделей с диска.\n\n" +
+                "Операцию нельзя отменить."
+            );
+
+        if (!confirmed) {
+            return;
+        }
+
+        setDeleting(true);
+        setError(null);
+        setDeleteMessage(null);
+
+        try {
+
+            const result =
+                await deleteTrainingRuns(
+                    selectedTrainingRunIds
+                );
+
+            /*
+             * Удаляем модели из текущего списка
+             * без обязательного повторного GET.
+             */
+            setTrainingRuns(
+                current =>
+                    current.filter(
+                        trainingRun =>
+                            !selectedTrainingRunIds.includes(
+                                trainingRun.id
+                            )
+                    )
+            );
+
+            setSelectedTrainingRunIds([]);
+
+            setPrediction(null);
+
+            setDeleteMessage(
+                `Удалено моделей: ${
+                    result.deleted_training_run_ids.length
+                }. ` +
+                `Удалено ModelFile: ${
+                    result.deleted_model_files
+                }.`
+            );
+
+            if (
+                result.file_errors.length > 0
+            ) {
+                setError(
+                    "Модели из БД удалены, но некоторые папки " +
+                    "не удалось удалить с диска."
+                );
+
+                console.error(
+                    "Ошибки удаления файлов:",
+                    result.file_errors
+                );
+            }
+
+        } catch (error) {
+
+            console.error(
+                "Ошибка удаления моделей:",
+                error
+            );
+
+            setError(
+                error instanceof Error
+                    ? error.message
+                    : "Не удалось удалить выбранные модели."
+            );
+
+        } finally {
+
+            setDeleting(false);
+        }
+    }
 
     return (
         <AppLayout>
@@ -278,7 +380,18 @@ export default function PredictionPage() {
                     {error}
                 </div>
             )}
-
+            {deleteMessage && (
+                <div
+                    style={{
+                        marginBottom: "20px",
+                        padding: "10px",
+                        border: "1px solid #2e7d32",
+                        borderRadius: "4px"
+                    }}
+                >
+                    {deleteMessage}
+                </div>
+            )}
 
             {/* ---------------------------------------- */}
             {/* Обученные модели */}
@@ -308,6 +421,7 @@ export default function PredictionPage() {
                         />
 
                         {selectedTrainingRunIds.length > 0 && (
+                            <div>
                             <button
                                 type="button"
                                 onClick={
@@ -319,6 +433,24 @@ export default function PredictionPage() {
                             >
                                 Снять выбор моделей
                             </button>
+
+                                <button
+                                    type="button"
+                                    onClick={handleDeleteTrainingRuns}
+                                    disabled={deleting}
+                                    style={{
+                                        color: "#b71c1c",
+                                        borderColor: "#b71c1c"
+                                    }}
+                                >
+                                    {deleting
+                                        ? "Удаление..."
+                                        : `Удалить выбранные модели (${selectedTrainingRunIds.length})`
+                                    }
+                                </button>
+
+                            </div>
+
                         )}
                     </>
                 )}

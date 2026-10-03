@@ -40,3 +40,6 @@ class PredictionBatchResponse(BaseModel):
     predictions: list[
         PredictionItemResponse
     ]
+
+class DeleteTrainingRunsRequest(BaseModel):
+    training_run_ids: list[str]

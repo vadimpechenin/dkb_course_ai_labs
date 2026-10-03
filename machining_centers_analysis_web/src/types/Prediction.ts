@@ -48,3 +48,13 @@ export interface ModelRow {
         PredictionItem
     >;
 }
+
+export interface DeleteTrainingRunsResponse {
+    deleted_training_run_ids: string[];
+    deleted_model_files: number;
+    deleted_model_directories: string[];
+    file_errors: {
+        directory: string;
+        error: string;
+    }[];
+}

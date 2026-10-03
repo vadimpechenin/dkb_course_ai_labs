@@ -1,7 +1,8 @@
 import api from "../services/axios";
 
 import type {
-    PredictionBatch
+    PredictionBatch,
+    DeleteTrainingRunsResponse
 } from "../types/Prediction";
 
 
@@ -45,6 +46,24 @@ export async function getPredictions(
     const response =
         await api.get<PredictionBatch>(
             `/predictions/${predictionId}`
+        );
+
+    return response.data;
+}
+
+export async function deleteTrainingRuns(
+    trainingRunIds: string[]
+): Promise<DeleteTrainingRunsResponse> {
+
+    const response =
+        await api.delete<DeleteTrainingRunsResponse>(
+            "/predictions/training-runs",
+            {
+                data: {
+                    training_run_ids:
+                    trainingRunIds
+                }
+            }
         );
 
     return response.data;

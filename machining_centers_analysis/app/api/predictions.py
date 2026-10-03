@@ -12,7 +12,8 @@ from app.db.core.session import SQLDataBase
 
 from app.schemas.prediction import (
     PredictionBatchResponse,
-    PredictionItemResponse
+    PredictionItemResponse,
+    DeleteTrainingRunsRequest
 )
 
 from app.services.prediction import (
@@ -283,4 +284,54 @@ def get_predictions(
         )
 
     finally:
+        database.session.close()
+
+@router.delete(
+    "/training-runs"
+)
+async def delete_training_runs(
+    request: DeleteTrainingRunsRequest
+):
+    database = SQLDataBase()
+    database.create_session()
+
+    try:
+
+        service = PredictionService(
+            database.session
+        )
+
+        result = (
+            service.delete_training_runs(
+                request.training_run_ids
+            )
+        )
+
+        return result
+
+    except ValueError as error:
+
+        database.session.rollback()
+
+        raise HTTPException(
+            status_code=400,
+            detail=str(error)
+        )
+
+    except Exception as error:
+
+        database.session.rollback()
+
+        print(
+            "DELETE TRAINING RUNS ERROR:",
+            repr(error)
+        )
+
+        raise HTTPException(
+            status_code=500,
+            detail="Ошибка удаления моделей"
+        )
+
+    finally:
+
         database.session.close()
