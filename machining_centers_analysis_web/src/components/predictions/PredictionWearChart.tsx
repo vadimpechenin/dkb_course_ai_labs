@@ -30,51 +30,97 @@ export default function PredictionWearChart({
 
     const points = useMemo<ChartPoint[]>(() => {
 
-        /*
-         * В predictions одна строка приходится
-         * на одну модель × один sample.
-         *
-         * Поэтому берём только первую модель,
-         * чтобы один и тот же sample не рисовался
-         * несколько раз.
-         */
-        const uniqueSamples = new Map<string, ChartPoint>();
+       
+    /*
+     * В predictions одна строка приходится
+     * на одну модель × один sample.
+     *
+     * Поэтому сначала оставляем только одну
+     * запись для каждого sample_id.
+     */
+    const uniqueSamples = new Map<string, {
+        wear: number;
+        actualClass: number;
+        sampleId: string;
+    }>();
 
-        for (const prediction of predictions) {
+    for (const prediction of predictions) {
 
-            if (uniqueSamples.has(prediction.sample_id)) {
-                continue;
-            }
-
-            const actualClass = Number(
-                prediction.actual_class
-            );
-
-            const wear = Number(
-                prediction.actual_wear
-            );
-
-            if (
-                !Number.isFinite(wear) ||
-                !Number.isFinite(actualClass)
-            ) {
-                continue;
-            }
-
-            uniqueSamples.set(
-                prediction.sample_id,
-                {
-                    index: uniqueSamples.size + 1,
-                    wear,
-                    actualClass,
-                    sampleId: prediction.sample_id
-                }
-            );
+        if (uniqueSamples.has(prediction.sample_id)) {
+            continue;
         }
 
-        return Array.from(
-            uniqueSamples.values()
+        const actualClass = Number(
+            prediction.actual_class
         );
+
+        const wear = Number(
+            prediction.actual_wear
+        );
+
+        if (
+            !Number.isFinite(wear) ||
+            !Number.isFinite(actualClass)
+        ) {
+            continue;
+        }
+
+        uniqueSamples.set(
+            prediction.sample_id,
+            {
+                wear,
+                actualClass,
+                sampleId: prediction.sample_id
+            }
+        );
+    }
+
+    /*
+     * В History порядок predictions может отличаться
+     * от порядка исходного JSON.
+     *
+     * Поэтому сортируем samples по их номеру.
+     *
+     * Для test_001, test_002, ..., test_1000
+     * это восстановит исходную последовательность.
+     */
+    const sortedSamples =
+        Array.from(uniqueSamples.values())
+            .sort((a, b) => {
+
+                const aMatch =
+                    a.sampleId.match(/(\d+)$/);
+
+                const bMatch =
+                    b.sampleId.match(/(\d+)$/);
+
+                if (aMatch && bMatch) {
+                    return (
+                        Number(aMatch[1]) -
+                        Number(bMatch[1])
+                    );
+                }
+
+                /*
+                 * Запасной вариант для идентификаторов,
+                 * в которых нет числового суффикса.
+                 */
+                return a.sampleId.localeCompare(
+                    b.sampleId
+                );
+            });
+
+    /*
+     * Только после сортировки присваиваем
+     * порядковый номер точки.
+     */
+    return sortedSamples.map(
+        (point, index) => ({
+            ...point,
+            index: index + 1
+        })
+    );
+
     }, [predictions]);
 
     if (points.length === 0) {
