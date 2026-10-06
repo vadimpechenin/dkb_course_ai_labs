@@ -39,7 +39,7 @@ class FeatureVectorCRUD:
             .order_by(
                 SignalSample.id
             )
-        )
+        ).execution_options(populate_existing=True) # <--- Принудительное обновление из БД
 
         result = self.session.execute(
             statement
