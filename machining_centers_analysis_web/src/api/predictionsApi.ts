@@ -72,7 +72,7 @@ export async function deleteTrainingRuns(
 export async function getPredictionHistory(
     trainingRunIds: string[] = []
 ): Promise<PredictionHistoryItem[]> {
-    console.log("Отправка запроса на историю")
+    //console.log("Отправка запроса на историю")
     //console.log(JSON.stringify(response.data, null, 2));
     const params = new URLSearchParams();
 
@@ -85,7 +85,7 @@ export async function getPredictionHistory(
             trainingRunId
         );
     }
-    console.log(params)
+    //console.log(params)
     const response =
         await api.get<PredictionHistoryResponse>(
             "/predictions/history",

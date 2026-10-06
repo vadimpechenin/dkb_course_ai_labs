@@ -473,6 +473,7 @@ export default function HistoryPage() {
                         predictions={
                             selectedBatch.predictions
                         }
+                        //console.log(predictions)
                     />
 
 

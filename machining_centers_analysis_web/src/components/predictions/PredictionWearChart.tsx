@@ -155,11 +155,11 @@ export default function PredictionWearChart({
      * Последний sample тоже показываем,
      * даже если он не попал в шаг.
      */
-    const visiblePoints = points.filter(
-        (_, index) =>
-            index % markerStep === 0 ||
-            index === points.length - 1
-    );
+    const visiblePoints = points.filter((point, idx) => {
+        const isStep = idx % markerStep === 0;
+        const isLast = idx === points.length - 1;
+        return isStep || isLast;
+    });
 
     /*
      * Линия износа строится по всем точкам.
@@ -344,7 +344,7 @@ export default function PredictionWearChart({
                             })
                         `}
                     >
-                        Wear
+                        Износ
                     </text>
 
                 </svg>
