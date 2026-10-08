@@ -27,7 +27,7 @@ from app.services.feature_mapping import (
     FeatureMappingService
 )
 
-MODEL_DIR = "models"
+from app.core.settings import MODELS_DIR
 
 
 class TrainingService:
@@ -433,7 +433,7 @@ class TrainingService:
     ):
 
         directory = os.path.join(
-            MODEL_DIR,
+            MODELS_DIR,
             training_run.id
         )
 
